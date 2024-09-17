@@ -1,40 +1,8 @@
 <!-- Navbar.vue -->
 <template>
-  <div class="Navbar">
-    <span class="theme">知识图谱构建平台</span>
-    <div>
-      <button class="a">图谱探索</button>
-      <button @click="toBuildingPage" class="a">构建工具</button>
-      <button href="#services" class="a">用户中心</button>
-      <button href="#concat" class="a">帮助文档</button>
-    </div>
-    <div class="menu">
-      <span class="menu-label">超级管理员</span>
-      <div class="dropdown">
-        <a href="#information">信息</a>
-        <a href="#settings">设置</a>
-        <a href="#logout">退出</a>
-      </div>
-    </div>
-  </div>
-
-
-<!--    </el-menu>-->
-<!--&lt;!&ndash;      <div class="logout-fix">&ndash;&gt;-->
-<!--&lt;!&ndash;        <el-tooltip&ndash;&gt;-->
-<!--&lt;!&ndash;            class="item"&ndash;&gt;-->
-<!--&lt;!&ndash;            effect="light"&ndash;&gt;-->
-<!--&lt;!&ndash;            :content="getUserRole"&ndash;&gt;-->
-<!--&lt;!&ndash;            placement="right"&ndash;&gt;-->
-<!--&lt;!&ndash;        >&ndash;&gt;-->
-<!--&lt;!&ndash;          <div class="logout-name">{{ getUsername() }}</div>&ndash;&gt;-->
-<!--&lt;!&ndash;        </el-tooltip>&ndash;&gt;-->
-<!--&lt;!&ndash;        <div class="logout" @click="logout()">退出登录</div>&ndash;&gt;-->
-<!--&lt;!&ndash;      </div>&ndash;&gt;-->
-<!--  </el-aside>-->
-
-<!--  侧边栏-->
+  <!--侧边栏-->
   <el-aside>
+
     <el-menu
         :default-active="activeIndex"
         class="el-menu-vertical-demo"
@@ -42,6 +10,9 @@
         unique-opened
         router
     >
+      <header style="background-color: rgba(169,169,169,0.5)">
+        <div class="title-inner">{{ this.title }}</div>
+      </header>
       <!-- 带有子列表的菜单项 -->
       <el-sub-menu index="Design" class="custom-menu-item">
         <template #title>
@@ -91,145 +62,66 @@
 
 </template>
   
-<script>
-  import { ref } from 'vue';
-  import { useRouter, useRoute } from 'vue-router'
+<script setup>
+import {onMounted, ref} from 'vue';
+import { useRouter, useRoute } from 'vue-router'
+const router = useRouter()
+const route = useRoute()
+const activeIndex = ref('EntityDesign'); // 默认选中的菜单项
+const title = ref('')
 
-  export default {
-    name: "Navbar",
-    setup() {
-      const activeIndex = ref('EntityDesign'); // 默认选中的菜单项
+defineProps({
+  title: {
+    type: String,
+    required: true
+  }
+});
 
-      const handleSelect = (key) => {
-        console.log(`Selected: ${key}`);
-        activeIndex.value=key;
-        router.push({
-          path:"/"+key
-        })
-      };
+const handleSelect = (key) => {
+  console.log(`Selected: ${key}`);
+  activeIndex.value=key;
+  router.push({
+    path:"/"+key
+  })
+};
 
-      const router = useRouter()
-      const route = useRoute()
-
-      function toBuildingPage() {
-        console.log("toBuildPage")
-        router.push({
-          path: '/EntityDesign',
-          // query: {
-          //   title: ''
-          // }
-        })
-      }
-
-      // function toUserPage() {
-      //
-      //   router.push({
-      //     path: '/EntityDesign',
-      //     // query: {
-      //     //   title: ''
-      //     // }
-      //   })
-      // }
-      //
-      // function toExplorePage() {
-      //   router.push({
-      //     path: '/EntityDesign',
-      //     // query: {
-      //     //   title: ''
-      //     // }
-      //   })
-      // }
-
-      return {
-        activeIndex,
-        handleSelect,
-        toBuildingPage,
-      };
-    }
-  };
-  </script>
+// export default {
+  //   name: "Navbar",
+  //   setup() {
+  //     const router = useRouter()
+  //     const route = useRoute()
+  //     const activeIndex = ref('EntityDesign'); // 默认选中的菜单项
+  //     const title = ref('')
+  //
+  //     onMounted(() => {
+  //       title.value = route.params.title
+  //     })
+  //
+  //     const handleSelect = (key) => {
+  //       console.log(`Selected: ${key}`);
+  //       activeIndex.value=key;
+  //       router.push({
+  //         path:"/"+key
+  //       })
+  //     };
+  //
+  //
+  //     return {
+  //       title,
+  //       activeIndex,
+  //       handleSelect
+  //     };
+  //   }
+  // };
+</script>
   
 <style scoped >
 
-.Navbar{
-  background-color: rgb(56,102,165);
-  overflow: visible;
-  height: 80px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-}
-
-.theme{
-  position:absolute;
-  left:40px;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 25px;
-  line-height: 60px;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
-}
-
-.a{
-  background-color: transparent; /* 背景透明 */
-  border: none; /* 无边框 */
-  float:left;
-  display: block;
-  color: rgba(255, 255, 255, 0.7);
-  text-align: center;
-  padding: 14px 20px;
-  text-decoration: none;
-  margin: 0 10px;
-  position: relative;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
+.title-inner {
+  padding: 15px;
   font-size: 18px;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+  font-weight: bold;
 }
-
-.a:hover{
-  color: white;
-}
-
-.a:active{
-  color: white;
-}
-
-
-.menu {
-  position: absolute;
-  right: 40px;
-  font-size: 14px;
-}
-
-.menu-label {
-  color: rgba(255, 255, 255, 0.8); /* 使用稍透明的白色 */
-  font-size: 20px;
-  cursor: pointer; /* 鼠标悬停时显示指针光标 */
-}
-
-.dropdown {
-  display: none; /* 初始隐藏下拉菜单 */
-  position: absolute;
-  top: 100%; /* 使下拉菜单出现在菜单字段下方 */
-  right: 0; /* 对齐到菜单字段的右侧 */
-  background-color: rgb(56, 102, 165);
-  border-radius: 4px; /* 添加圆角效果 */
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3); /* 添加阴影效果 */
-  white-space: nowrap; /* 防止文本换行 */
-}
-
-.menu:hover .dropdown {
-  display: block; /* 鼠标悬浮时显示下拉菜单 */
-}
-
-.dropdown a {
-  display: block;
-  padding: 10px 20px;
-  color: rgba(242, 241, 241, 0.8); /* 使用稍透明的白色 */
-  text-decoration: none;
-}
-
  .el-menu-vertical-demo {
    height: 100%;
    width: 20%;
@@ -267,20 +159,6 @@
    }
  }
 
-
-.title {
-  padding: 16px;
-}
-.title-inner {
- background-color: #9fa8da !important;
- border-color: #9fa8da !important;
- border-radius: 8px !important;
- line-height: 40px;
- height: 40px;
- text-align: center;
- font-size: 21px;
- font-weight: bold;
-}
 .el-aside {
  background-color: #fff !important;
  margin-right: 10px;
