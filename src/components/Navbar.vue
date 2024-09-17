@@ -11,12 +11,12 @@
         router
     >
       <header style="background-color: rgba(169,169,169,0.5)">
-        <div class="title-inner">{{ this.title }}</div>
+        <div class="title-inner">{{ title }}</div>
       </header>
       <!-- 带有子列表的菜单项 -->
       <el-sub-menu index="Design" class="custom-menu-item">
         <template #title>
-          <!--        <el-icon>< /></el-icon>-->
+          <el-icon><Suitcase /></el-icon>
           <span>本体设计</span>
         </template>
         <el-menu-item index="EntityDesign">实体设计</el-menu-item>
@@ -25,7 +25,7 @@
 
       <el-sub-menu index="Data" class="custom-menu-item">
         <template #title>
-          <!--        <el-icon><Grid /></el-icon>-->
+          <el-icon><Histogram /></el-icon>
           <span>数据管理</span>
         </template>
         <el-menu-item index="StructuralData">结构化数据</el-menu-item>
@@ -35,7 +35,7 @@
       <!-- 另一个带子菜单的项 -->
       <el-sub-menu index="GraphMapping" class="custom-menu-item">
         <template #title>
-          <!--        <el-icon><Picture /></el-icon>-->
+          <el-icon><DataLine /></el-icon>
           <span>图谱映射</span>
         </template>
         <el-menu-item index="StructuredMapping">结构化映射</el-menu-item>
@@ -45,14 +45,14 @@
       <!-- 没有子菜单的菜单项 -->
       <el-sub-menu index="GraphData" class="custom-menu-item">
         <template #title>
-          <!--        <el-icon><Picture /></el-icon>-->
+          <el-icon><Grid /></el-icon>
           <span>图谱数据</span>
         </template>
       </el-sub-menu>
 
       <el-sub-menu index="GraphDetail" class="custom-menu-item">
         <template #title>
-          <!--        <el-icon><Picture /></el-icon>-->
+          <el-icon><More /></el-icon>
           <span>图谱详情</span>
         </template>
       </el-sub-menu>
@@ -65,10 +65,10 @@
 <script setup>
 import {onMounted, ref} from 'vue';
 import { useRouter, useRoute } from 'vue-router'
+import { Suitcase,Histogram,DataLine,Grid,More } from '@element-plus/icons-vue';
 const router = useRouter()
 const route = useRoute()
-const activeIndex = ref('EntityDesign'); // 默认选中的菜单项
-const title = ref('')
+const activeIndex = ref('EntityDesign') // 默认选中的菜单项
 
 defineProps({
   title: {
@@ -85,34 +85,47 @@ const handleSelect = (key) => {
   })
 };
 
+
 // export default {
-  //   name: "Navbar",
-  //   setup() {
-  //     const router = useRouter()
-  //     const route = useRoute()
-  //     const activeIndex = ref('EntityDesign'); // 默认选中的菜单项
-  //     const title = ref('')
-  //
-  //     onMounted(() => {
-  //       title.value = route.params.title
-  //     })
-  //
-  //     const handleSelect = (key) => {
-  //       console.log(`Selected: ${key}`);
-  //       activeIndex.value=key;
-  //       router.push({
-  //         path:"/"+key
-  //       })
-  //     };
-  //
-  //
-  //     return {
-  //       title,
-  //       activeIndex,
-  //       handleSelect
-  //     };
-  //   }
-  // };
+//   name: 'Navbar',
+//   props:{
+//     title: {
+//       type: String,
+//       required: true
+//     }
+//   },
+//   setup(props){
+//     const router = useRouter()
+//     const route = useRoute()
+//     const activeIndex = ref('EntityDesign') // 默认选中的菜单项
+//     const NavTitle = props.title
+//
+//
+//     // onMounted(()=>{
+//     //   title.value=defineProps({
+//     //     title: {
+//     //       type: String,
+//     //       required: true
+//     //     }
+//     //   });
+//     // })
+//
+//     const handleSelect = (key) => {
+//       console.log(`Selected: ${key}`);
+//       activeIndex.value=key;
+//       router.push({
+//         path:"/"+key
+//       })
+//     };
+//
+//     return{
+//       activeIndex,
+//       NavTitle,
+//       handleSelect,
+//     }
+//   }
+// }
+
 </script>
   
 <style scoped >

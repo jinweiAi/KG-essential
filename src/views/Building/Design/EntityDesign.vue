@@ -13,55 +13,32 @@
 </template>
 
 
-<script setup>
+<script>
 import Navbar from "@/components/Navbar.vue";
 import {onMounted, ref} from 'vue';
 import { useRouter, useRoute } from 'vue-router'
-const router = useRouter()
-const route = useRoute()
-const title = ref('')
 
-onMounted(()=>{
-  title.value=route.query.name
-  console.log('get title:',title.value)
+export default {
+  name:"EntityDesign",
+  components: {
+    Navbar
+  },
+  setup(){
+    const router = useRouter()
+    const route = useRoute()
+    const title = ref('')
+    onMounted(()=>{
+      title.value=route.query.name
+      console.log('get title:',title.value)
 
-})
+    })
 
-// export default {
-//   name:"EntityDesign",
-//   components: {Navbar},
-//   // mounted() {
-//   //   const router = useRouter()
-//   //   const route = useRoute()
-//   //   const title = route.params.graphName
-//   //   console.log('receive title:',title);
-//   //
-//   //   router.push({
-//   //     path: '/EntityDesign',
-//   //     params:{
-//   //       title:title
-//   //     }
-//   //   });
-//   //
-//   // },
-//   setup(){
-//     const router = useRouter()
-//     const route = useRoute()
-//     const title = ref('')
-//
-//
-//     onMounted(()=>{
-//       title.value=route.params.graphName
-//     })
-//
-//
-//
-//     return {
-//       title,
-//     }
-//
-//   }
-// };
+    return {
+      title,
+    }
+
+  }
+};
 </script>
 
 

@@ -6,22 +6,22 @@
           class="a"
           :class="{ active: activeButton === 'explore' }"
           @click="goToRoute('explore')"
-      >图谱探索</button>
+      ><el-icon size="15" class="icon-box"><ChatRound /></el-icon>图谱探索</button>
       <button
           class="a"
           :class="{ active: activeButton === 'tools' }"
           @click="goToRoute('tools')"
-      >构建工具</button>
+      ><el-icon size="15" class="icon-box"><Operation /></el-icon>构建工具</button>
       <button
           class="a"
           :class="{ active: activeButton === 'user' }"
           @click="goToRoute('user')"
-      >用户中心</button>
+      ><el-icon size="15" class="icon-box"><User /></el-icon>用户中心</button>
       <button
           class="a"
           :class="{ active: activeButton === 'help' }"
           @click="goToRoute('help')"
-      >帮助文档</button>
+      ><el-icon size="15" class="icon-box"><Document /></el-icon>帮助文档</button>
     </div>
     <div class="menu">
       <span class="menu-label">超级管理员</span>
@@ -51,10 +51,17 @@
 <script>
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router'
+import { ChatRound,Operation,User,Document } from '@element-plus/icons-vue';
 
 export default {
-  name: "Header",
-  setup() {
+  name: 'GraphList',
+  components:{
+    ChatRound,
+    Operation,
+    User,
+    Document
+  },
+  setup(){
     const router = useRouter()
     const route = useRoute()
     const activeButton= ref('tools')
@@ -94,22 +101,13 @@ export default {
       }
     }
 
-    // function toBuildingPage() {
-    //   console.log("toBuildPage")
-    //   router.push({
-    //     path: '/',
-    //     // query: {
-    //     //   title: ''
-    //     // }
-    //   })
-    // }
-
-    return {
+    return{
       activeButton,
       goToRoute,
-    };
+    }
   }
-};
+}
+
 
 </script>
 
@@ -133,18 +131,22 @@ export default {
   line-height: 60px;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
 }
+.icon-box{
+  margin-right: 5px;
+  text-decoration: none;
+  position: relative;
+}
 
 .a{
   background-color: transparent; /* 背景透明 */
+  margin: 20px;
   border: none; /* 无边框 */
   float:left;
   display: block;
   color: rgba(255, 255, 255, 0.5);
   text-align: center;
-  padding: 14px 20px;
   text-decoration: none;
   position: relative;
-  border-radius: 4px;
   transition: background-color 0.3s ease;
   font-size: 18px;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);

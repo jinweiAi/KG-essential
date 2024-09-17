@@ -75,10 +75,15 @@
 <script>
 import { ref } from 'vue';
 import {reactive} from "@vue/runtime-core";
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router';
+import { Edit,Delete } from '@element-plus/icons-vue';
 
 export default {
   name: 'GraphList',
+  components:{
+    Edit,
+    Delete
+  },
   setup() {
     const router = useRouter()
     const route = useRoute()
