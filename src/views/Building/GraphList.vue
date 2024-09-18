@@ -74,7 +74,7 @@
 
 <script>
 import { ref } from 'vue';
-import {reactive} from "@vue/runtime-core";
+import { reactive } from "@vue/runtime-core";
 import { useRouter, useRoute } from 'vue-router';
 import { Edit,Delete } from '@element-plus/icons-vue';
 
@@ -158,6 +158,7 @@ export default {
           name:name
         }
       });
+      localStorage.setItem('ProjectName', name)
       console.log(`进入图谱: ${name}`);
     };
 

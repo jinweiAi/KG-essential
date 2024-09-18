@@ -19,8 +19,8 @@
           <el-icon><Suitcase /></el-icon>
           <span>本体设计</span>
         </template>
-        <el-menu-item index="EntityDesign">实体设计</el-menu-item>
-        <el-menu-item index="RelationDesign">关系设计</el-menu-item>
+        <el-menu-item index="EntityDesign"><pre>    实体设计</pre></el-menu-item>
+        <el-menu-item index="RelationDesign"><pre>    关系设计</pre></el-menu-item>
       </el-sub-menu>
 
       <el-sub-menu index="Data" class="custom-menu-item">
@@ -28,8 +28,8 @@
           <el-icon><Histogram /></el-icon>
           <span>数据管理</span>
         </template>
-        <el-menu-item index="StructuralData">结构化数据</el-menu-item>
-        <el-menu-item index="UnstructuralData">非结构化数据</el-menu-item>
+        <el-menu-item index="StructuralData"><pre>    结构化数据</pre></el-menu-item>
+        <el-menu-item index="UnstructuralData"><pre>    非结构化数据</pre></el-menu-item>
       </el-sub-menu>
 
       <!-- 另一个带子菜单的项 -->
@@ -38,8 +38,8 @@
           <el-icon><DataLine /></el-icon>
           <span>图谱映射</span>
         </template>
-        <el-menu-item index="StructuredMapping">结构化映射</el-menu-item>
-        <el-menu-item index="UnstructuredMapping">非结构化映射</el-menu-item>
+        <el-menu-item index="StructuredMapping"><pre>    结构化映射</pre></el-menu-item>
+        <el-menu-item index="UnstructuredMapping"><pre>    非结构化映射</pre></el-menu-item>
       </el-sub-menu>
 
       <!-- 没有子菜单的菜单项 -->
@@ -66,16 +66,21 @@
 import {onMounted, ref} from 'vue';
 import { useRouter, useRoute } from 'vue-router'
 import { Suitcase,Histogram,DataLine,Grid,More } from '@element-plus/icons-vue';
+import {reactive} from "@vue/runtime-core";
 const router = useRouter()
 const route = useRoute()
 const activeIndex = ref('EntityDesign') // 默认选中的菜单项
+const title = ref('')
+// defineProps({
+//   title: {
+//     type: String,
+//     required: true
+//   }
+// });
 
-defineProps({
-  title: {
-    type: String,
-    required: true
-  }
-});
+onMounted(()=>{
+  title.value=localStorage.getItem('ProjectName')
+})
 
 const handleSelect = (key) => {
   console.log(`Selected: ${key}`);
@@ -84,6 +89,10 @@ const handleSelect = (key) => {
     path:"/"+key
   })
 };
+
+onMounted(() => {
+  activeIndex.value = route.name || 'EntityDesign'; // 使用当前的路由名称或默认值
+});
 
 
 // export default {

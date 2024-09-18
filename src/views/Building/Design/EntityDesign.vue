@@ -5,9 +5,6 @@
   <div class="content-container">
     <span>entity-design</span>
 
-
-
-
   </div>
 
 </template>
@@ -28,7 +25,7 @@ export default {
     const route = useRoute()
     const title = ref('')
     onMounted(()=>{
-      title.value=route.query.name
+      const title = localStorage.getItem('ProjectName')
       console.log('get title:',title.value)
 
     })
