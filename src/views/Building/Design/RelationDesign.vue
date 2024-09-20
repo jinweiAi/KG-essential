@@ -1,17 +1,13 @@
 <template>
-<!--  <Navbar />-->
-  <span>relation-design</span>
-
-</template>
-
-
-<script setup lang="js">
-
-import Navbar from "@/App.vue";
-</script>
-
-
-
-<style scoped>
-
-</style>
+  <!--  <Navbar />-->
+    <span>structured-mapping</span>
+  </template>
+  
+  <script setup lang="ts">
+  
+  import Navbar from "@/components/Navbar.vue";
+  </script>
+  
+  <style scoped>
+  
+  </style>
