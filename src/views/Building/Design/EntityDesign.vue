@@ -1,11 +1,11 @@
 <template>
-<!--  <Navbar />-->
 
   <Navbar :title="title"/>
   <div class="content-container">
     <span>entity-design</span>
 
   </div>
+
 
 </template>
 

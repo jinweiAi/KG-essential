@@ -33,7 +33,7 @@
         <el-table-column fixed="right" label="操作" width="150">
           <template #default="scope" >
             <el-link type="primary" class="operation" @click="previewFile(scope.row)">预览</el-link>
-            <el-link type="success" class="operation" @click="downloadFile(scope.row)">下载</el-link>
+            <el-link type="success" class="operation" @click="downloadFile(scope.row)">抽取</el-link>
             <el-link type="danger" class="operation" @click="deleteFile(scope.row)">删除</el-link>
           </template>
         </el-table-column>

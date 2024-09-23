@@ -1,6 +1,6 @@
 <template>
   <div class="Navbar">
-    <span class="theme">知识图谱构建平台</span>
+    <span class="theme"><i class="iconfont icon-tupushujuyuan" style="font-size: 28px;margin-right: 5px"></i>知识图谱构建平台</span>
     <div>
       <button
           class="a"
@@ -31,6 +31,18 @@
         <a href="#logout">退出</a>
       </div>
     </div>
+
+<!--    <el-dropdown>-->
+<!--    <span >超级管理员</span>-->
+<!--      <template #dropdown>-->
+<!--        <el-dropdown-menu>-->
+<!--          <el-dropdown-item>信息</el-dropdown-item>-->
+<!--          <el-dropdown-item>设置</el-dropdown-item>-->
+<!--          <el-dropdown-item>退出</el-dropdown-item>-->
+<!--        </el-dropdown-menu>-->
+<!--      </template>-->
+<!--    </el-dropdown>-->
+
   </div>
 
   <!--    </el-menu>-->
@@ -166,6 +178,7 @@ export default {
   position: absolute;
   right: 40px;
   font-size: 14px;
+  z-index: 10; /* 确保父元素也有较高的 z-index */
 }
 
 .menu-label {
@@ -183,9 +196,10 @@ export default {
   border-radius: 4px; /* 添加圆角效果 */
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3); /* 添加阴影效果 */
   white-space: nowrap; /* 防止文本换行 */
+  z-index: 1000; /* 将 z-index 提升到足够高，确保菜单位于顶层 */
 }
 
-.menu:hover .dropdown {
+.menu:hover .dropdown{
   display: block; /* 鼠标悬浮时显示下拉菜单 */
 }
 

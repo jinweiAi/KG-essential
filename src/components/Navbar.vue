@@ -2,7 +2,6 @@
 <template>
   <!--侧边栏-->
   <el-aside>
-
     <el-menu
         :default-active="activeIndex"
         class="el-menu-vertical-demo"
@@ -14,59 +13,93 @@
         <div class="title-inner">{{ title }}</div>
       </header>
       <!-- 带有子列表的菜单项 -->
-      <el-sub-menu index="Design" class="custom-menu-item">
+      <el-sub-menu index="Design">
         <template #title>
           <el-icon><Suitcase /></el-icon>
           <span>本体设计</span>
         </template>
-        <el-menu-item index="EntityDesign"><pre>    实体设计</pre></el-menu-item>
-        <el-menu-item index="RelationDesign"><pre>    关系设计</pre></el-menu-item>
+        <el-menu-item index="EntityDesign"><pre>  实体设计</pre></el-menu-item>
+        <el-menu-item index="RelationDesign"><pre>  关系设计</pre></el-menu-item>
       </el-sub-menu>
 
-      <el-sub-menu index="Data" class="custom-menu-item">
+      <el-sub-menu index="Data">
         <template #title>
           <el-icon><Histogram /></el-icon>
           <span>数据管理</span>
         </template>
-        <el-menu-item index="StructuralData"><pre>    结构化数据</pre></el-menu-item>
-        <el-menu-item index="UnstructuralData"><pre>    非结构化数据</pre></el-menu-item>
+        <el-menu-item index="StructuralData"><pre>  结构化数据</pre></el-menu-item>
+        <el-menu-item index="UnstructuralData"><pre>  非结构化数据</pre></el-menu-item>
       </el-sub-menu>
 
       <!-- 另一个带子菜单的项 -->
-      <el-sub-menu index="GraphMapping" class="custom-menu-item">
+      <el-sub-menu index="GraphMapping">
         <template #title>
           <el-icon><DataLine /></el-icon>
           <span>图谱映射</span>
         </template>
-        <el-menu-item index="StructuredMapping"><pre>    结构化映射</pre></el-menu-item>
-        <el-menu-item index="UnstructuredMapping"><pre>    非结构化映射</pre></el-menu-item>
+        <el-menu-item index="StructuredMapping"><pre>  结构化映射</pre></el-menu-item>
+        <el-menu-item index="UnstructuredMapping"><pre>  非结构化映射</pre></el-menu-item>
       </el-sub-menu>
 
       <!-- 没有子菜单的菜单项 -->
-      <el-sub-menu index="GraphData" class="custom-menu-item">
-        <template #title>
-          <el-icon><Grid /></el-icon>
-          <span>图谱数据</span>
-        </template>
-      </el-sub-menu>
+      <el-menu-item index="GraphData">
+        <el-icon><Grid /></el-icon>
+        <span>图谱数据</span>
+      </el-menu-item>
 
-      <el-sub-menu index="GraphDetail" class="custom-menu-item">
+      <el-menu-item index="GraphDetail">
         <template #title>
           <el-icon><More /></el-icon>
           <span>图谱详情</span>
         </template>
-      </el-sub-menu>
+      </el-menu-item>
     </el-menu>
 
   </el-aside>
 
 </template>
-  
+
+<!--<template>-->
+<!--  <el-aside>-->
+<!--    <el-menu-->
+<!--        :default-active="activeIndex"-->
+<!--        @select="handleSelect"-->
+<!--        class="el-menu-vertical-demo"-->
+<!--        router-->
+<!--        unique-opened-->
+<!--    >-->
+<!--      <header style="background-color: rgba(169,169,169,0.5)">-->
+<!--        <div class="title-inner">{{ title }}</div>-->
+<!--      </header>-->
+<!--      <div v-for="(item,index) in menu" :key="index">-->
+<!--        &lt;!&ndash; 一级&ndash;&gt;-->
+<!--        <el-menu-item  v-if="item.Subclass.length === 0" :index="item.id">-->
+<!--          &lt;!&ndash; vue3中图标是以组件的形式引入 遍历的时候要用组件的形式遍历&ndash;&gt;-->
+<!--          <el-icon><Component :is="item.icon"></Component></el-icon>-->
+<!--          <span>{{item.title}}</span>-->
+<!--        </el-menu-item>-->
+
+<!--        &lt;!&ndash; 二级三级&ndash;&gt;-->
+<!--        <el-sub-menu  v-if="item.Subclass.length>0" :index="item.id" >-->
+<!--          <template #title>-->
+<!--            <el-icon><Component :is="item.icon"></Component></el-icon>-->
+<!--            <span>{{item.title}}</span>-->
+<!--          </template>-->
+<!--          <div v-for="(itemTwo,index) in item.Subclass " :key='index'>-->
+<!--            <el-menu-item :index="itemTwo.id">{{itemTwo.title}}</el-menu-item>-->
+<!--          </div>-->
+<!--        </el-sub-menu>-->
+<!--      </div>-->
+<!--    </el-menu>-->
+<!--  </el-aside>-->
+<!--</template>-->
+
+
 <script setup>
 import {onMounted, ref} from 'vue';
 import { useRouter, useRoute } from 'vue-router'
 import { Suitcase,Histogram,DataLine,Grid,More } from '@element-plus/icons-vue';
-import {reactive} from "@vue/runtime-core";
+import {reactive, shallowRef} from "@vue/runtime-core";
 const router = useRouter()
 const route = useRoute()
 const activeIndex = ref('EntityDesign') // 默认选中的菜单项
@@ -80,6 +113,7 @@ const title = ref('')
 
 onMounted(()=>{
   title.value=localStorage.getItem('ProjectName')
+  activeIndex.value = route.name || 'EntityDesign'; // 使用当前的路由名称或默认值
 })
 
 const handleSelect = (key) => {
@@ -90,10 +124,81 @@ const handleSelect = (key) => {
   })
 };
 
-onMounted(() => {
-  activeIndex.value = route.name || 'EntityDesign'; // 使用当前的路由名称或默认值
-});
+// const Array=[
+//   {
+//     id:'Design',
+//     icon:Suitcase,
+//     title:'本体设计',
+//     router:'',
+//     Subclass:[
+//       {
+//         id:'EntityDesign',
+//         title:'实体设计',
+//         router:'EntityDesign',
+//       },
+//       {
+//         id:'RelationDesign',
+//         title:'关系设计',
+//         router:'RelationDesign',
+//       }
+//     ]//是否有二级三级等等菜单
+//   },
+//   {
+//     id:'Data',
+//     icon:Histogram,
+//     title:'用户列表',
+//     router:'',
+//     Subclass:[
+//       {
+//         id:'StructuralData',
+//         title:'结构化数据',
+//         router:'StructuralData',
+//       },
+//       {
+//         id:'UnstructuralData',
+//         title:'非结构化数据',
+//         router:'UnstructuralData',
+//       }
+//     ]//是否有二级三级等等菜单
+//   },
+//   {
+//     id:'GraphMapping',
+//     icon:DataLine,
+//     title:'图谱映射',
+//     router:'',
+//     Subclass:[
+//       {
+//         id:'StructuredMapping',
+//         title:'结构化映射',
+//         router:'StructuredMapping',
+//       },
+//       {
+//         id:'UnstructuredMapping',
+//         title:'非结构化映射',
+//         router:'UnstructuredMapping',
+//       }
+//     ]//是否有二级三级等等菜单
+//   },
+//   {
+//     id:'GraphData',
+//     icon:Grid,
+//     title:'图谱数据',
+//     router:'GraphData',
+//     Subclass:[]//是否有二级三级等等菜单
+//   },
+//   {
+//     id:'GraphDetail',
+//     icon:More,
+//     title:'图谱详情',
+//     router:'GraphDetail',
+//     Subclass:[]//是否有二级三级等等菜单
+//   }
+// ]
+// const menu = shallowRef(Array)
 
+// onMounted(()=>{
+//   activeIndex.value = route.name || 'EntityDesign'; // 使用当前的路由名称或默认值
+// })
 
 // export default {
 //   name: 'Navbar',
@@ -136,7 +241,7 @@ onMounted(() => {
 // }
 
 </script>
-  
+
 <style scoped >
 
 .title-inner {
@@ -151,7 +256,7 @@ onMounted(() => {
    position: fixed;
  }
 
- .custom-menu-item .el-menu-item, .custom-menu-item .el-sub-menu__title {
+ .custom-menu-item el-menu-item, .custom-menu-item el-sub-menu__title {
    font-size: 14px; /* 保持字体大小一致 */
    font-weight: normal; /* 保持字体粗细一致 */
    line-height: 56px; /* 统一行高 */
@@ -162,11 +267,11 @@ onMounted(() => {
  }
 
  /* 在鼠标悬停时效果 */
- .custom-menu-item .el-menu-item:hover, .custom-menu-item .el-sub-menu__title:hover {
+ .custom-menu-item el-menu-item:hover, .custom-menu-item el-sub-menu__title:hover {
    background-color: #f0f0f0; /* 鼠标悬停时的背景色 */
  }
 
-.custom-menu-item .el-menu-item:hover, .custom-menu-item .el-sub-menu__title:active {
+.custom-menu-item el-menu-item:hover, .custom-menu-item el-sub-menu__title:active {
   background-color: #f0f0f0; /* 鼠标点击时的背景色 */
 }
 
@@ -181,14 +286,14 @@ onMounted(() => {
    }
  }
 
-.el-aside {
+el-aside {
  background-color: #fff !important;
  margin-right: 10px;
 }
-.el-menu {
+el-menu {
  border-right: solid 1px #fff;
 }
-.el-menu-item {
+el-menu-item {
  width: 92%;
  margin: 0 auto;
  padding: 0 10px !important;
@@ -199,13 +304,13 @@ onMounted(() => {
 .el-menu-item > i {
  margin-right: 30px !important;
 }
-.el-menu-item:focus,
-.el-menu-item:hover {
+el-menu-item:focus,
+el-menu-item:hover {
  outline: 0;
  background-color: #f0f0f0 !important;
 }
 
-.el-menu-item.is-active {
+el-menu-item.is-active {
   background-color: rgba(0, 0, 0, 0);
 }
 .logout-fix {
