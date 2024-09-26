@@ -132,6 +132,8 @@
 <script lang="ts">
 import Navbar from "@/components/Navbar.vue";
 import { ref } from 'vue';
+import {onMounted} from 'vue';
+import { useRouter, useRoute } from 'vue-router'
 
 export default {
   name: "EntityDesign",
@@ -139,7 +141,14 @@ export default {
     Navbar
   },
   setup() {
-    const title = localStorage.getItem('ProjectName');
+    const router = useRouter()
+    const route = useRoute()
+    const title = ref('')
+    onMounted(()=>{
+      const title = localStorage.getItem('ProjectName')
+      console.log('get title:',title.value)
+
+    })
     const entityDialogVisible = ref(false);
     const attributeDialogVisible = ref(false);
     const isEditEntity = ref(false); // 用于判断实体类型对话框
@@ -266,10 +275,6 @@ export default {
   display: flex;
 }
 </style>
-
-
-
-
 
 
 

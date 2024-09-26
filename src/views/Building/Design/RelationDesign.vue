@@ -63,11 +63,11 @@
             v-model:current-page="currentPage"
             v-model:page-size="pageSize"
             :page-sizes="[10, 20, 50, 100]"
-            :size="size" 
+            :size="size"
             layout="total, sizes, prev, pager, next, jumper"
-            :total="tableData.length"
-            @size-change="handleSizeChange" 
-            @current-change="handleCurrentChange" 
+            :total=tableData.length
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
         />
       </div>
 
@@ -102,7 +102,11 @@
 <script lang="ts">
 import Navbar from "@/components/Navbar.vue";
 import {computed, onMounted, ref} from 'vue';
+<<<<<<< HEAD
 import type { ComponentSize } from 'element-plus'; 
+=======
+import type { ComponentSize } from 'element-plus';
+>>>>>>> shenjiaxu
 import {reactive} from "@vue/runtime-core";
 
 export default {
@@ -149,8 +153,7 @@ export default {
       console.log(`${size} items per page`)
     }
     const handleCurrentChange = (page) => {
-      console.log(`current page: ${page}`);
-
+      console.log(`current page: ${page}`)
     }
 
     // 创建对话框
@@ -199,8 +202,6 @@ export default {
   flex-grow: 1; /* 内容部分占据剩余的宽度 */
   overflow-y: auto; /* 如果内容超出页面高度，允许滚动 */
 }
-
-
 
 .button-box {
   display: flex;
