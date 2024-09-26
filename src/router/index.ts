@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 // 导入你的组件
+import GraphList from "@/views/Building/GraphList.vue";
 import EntityDesign from '@/views/Building/Design/EntityDesign.vue'
 import RelationDesign from '@/views/Building/Design/RelationDesign.vue'
 import StructuralData from '@/views/Building/Data/StructuralData.vue'
@@ -14,8 +15,8 @@ import GraphDetail  from "@/views/Building/GraphDetail.vue"
 const routes = [
     {
         path: '/',
-        name: 'EntityDesign',
-        component: EntityDesign
+        name: 'GraphList',
+        component: GraphList
     },
     {
         path: '/EntityDesign',

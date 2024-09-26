@@ -1,10 +1,7 @@
 <template>
-<!--    <div class="app">-->
-<!--      <router-view />-->
-<!--    </div>-->
-  <Navbar />
+  <Header/>
   <!-- 页面内容区域 -->
-  <div class="content-container">
+  <div>
     <router-view /> <!-- 加载页面内容 -->
   </div>
 </template>
@@ -12,10 +9,12 @@
 
 <script lang="js">
 
+    // import Navbar from "@/components/Navbar.vue";
+    import Header from "@/components/Header.vue";
     import Navbar from "@/components/Navbar.vue";
 
     export default {
-      components: {Navbar}
+      components: {Navbar, Header}
     };
 
 </script>
