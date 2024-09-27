@@ -4,7 +4,7 @@
     <el-card style="background-color: rgba(169,169,169,0.1)">
       <el-row :gutter="20">
         <el-col :span="12">
-          <el-button type="primary" class="button-box">添加文件</el-button>
+          <el-button type="primary" class="button-box">添加任务</el-button>
         </el-col>
         <el-col :span="12">
           <el-input v-model="searchQuery" placeholder="请输入任务名称" class="input-box">

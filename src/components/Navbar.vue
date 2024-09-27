@@ -28,14 +28,14 @@
           <span>数据管理</span>
         </template>
         <el-menu-item index="StructuralData"><pre>  结构化数据</pre></el-menu-item>
-        <el-menu-item index="UnstructuralData"><pre>  非结构化数据</pre></el-menu-item>
+        <el-menu-item index="UnstructuralData" disabled><pre>  非结构化数据</pre></el-menu-item>
       </el-sub-menu>
 
       <!-- 另一个带子菜单的项 -->
       <el-sub-menu index="GraphMapping">
         <template #title>
           <el-icon><DataLine /></el-icon>
-          <span>图谱映射</span>
+          <span><pre>   图谱映射</pre></span>
         </template>
         <el-menu-item index="StructuredMapping"><pre>  结构化映射</pre></el-menu-item>
         <el-menu-item index="UnstructuredMapping"><pre>  非结构化映射</pre></el-menu-item>
