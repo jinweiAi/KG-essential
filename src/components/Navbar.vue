@@ -1,102 +1,239 @@
 <!-- Navbar.vue -->
 <template>
-  <div class="Navbar">
-    <span class="theme">知识图谱构建平台</span>
-    <div>
-      <a href="#home">图谱探索</a>
-      <a href="#about">构建工具</a>
-      <a href="#services">用户中心</a>
-      <a href="#concat">帮助文档</a>
-    </div>
-    <div class="menu">
-      <span class="menu-label">超级管理员</span>
-      <div class="dropdown">
-        <a href="#information">信息</a>
-        <a href="#settings">设置</a>
-        <a href="#logout">退出</a>
-      </div>
-    </div>
-  </div>
+  <!--侧边栏-->
+  <el-aside>
+
+    <el-menu
+        :default-active="activeIndex"
+        class="el-menu-vertical-demo"
+        @select="handleSelect"
+        unique-opened
+        router
+    >
+      <header style="background-color: rgba(169,169,169,0.5)">
+        <div class="title-inner">{{ title }}</div>
+      </header>
+      <!-- 带有子列表的菜单项 -->
+      <el-sub-menu index="Design" class="custom-menu-item">
+        <template #title>
+          <el-icon><Suitcase /></el-icon>
+          <span>本体设计</span>
+        </template>
+        <el-menu-item index="EntityDesign"><pre>    实体设计</pre></el-menu-item>
+        <el-menu-item index="RelationDesign"><pre>    关系设计</pre></el-menu-item>
+      </el-sub-menu>
+
+      <el-sub-menu index="Data" class="custom-menu-item">
+        <template #title>
+          <el-icon><Histogram /></el-icon>
+          <span>数据管理</span>
+        </template>
+        <el-menu-item index="StructuralData"><pre>    结构化数据</pre></el-menu-item>
+        <el-menu-item index="UnstructuralData"><pre>    非结构化数据</pre></el-menu-item>
+      </el-sub-menu>
+
+      <!-- 另一个带子菜单的项 -->
+      <el-sub-menu index="GraphMapping" class="custom-menu-item">
+        <template #title>
+          <el-icon><DataLine /></el-icon>
+          <span>图谱映射</span>
+        </template>
+        <el-menu-item index="StructuredMapping"><pre>    结构化映射</pre></el-menu-item>
+        <el-menu-item index="UnstructuredMapping"><pre>    非结构化映射</pre></el-menu-item>
+      </el-sub-menu>
+
+      <!-- 没有子菜单的菜单项 -->
+      <el-sub-menu index="GraphData" class="custom-menu-item">
+        <template #title>
+          <el-icon><Grid /></el-icon>
+          <span>图谱数据</span>
+        </template>
+      </el-sub-menu>
+
+      <el-sub-menu index="GraphDetail" class="custom-menu-item">
+        <template #title>
+          <el-icon><More /></el-icon>
+          <span>图谱详情</span>
+        </template>
+      </el-sub-menu>
+    </el-menu>
+
+  </el-aside>
+
 </template>
   
-  <script>
-  export default {
-    name: "Navbar"
-  };
-  </script>
+<script setup>
+import {onMounted, ref} from 'vue';
+import { useRouter, useRoute } from 'vue-router'
+import { Suitcase,Histogram,DataLine,Grid,More } from '@element-plus/icons-vue';
+import {reactive} from "@vue/runtime-core";
+const router = useRouter()
+const route = useRoute()
+const activeIndex = ref('EntityDesign') // 默认选中的菜单项
+const title = ref('')
+// defineProps({
+//   title: {
+//     type: String,
+//     required: true
+//   }
+// });
+
+onMounted(()=>{
+  title.value=localStorage.getItem('ProjectName')
+})
+
+const handleSelect = (key) => {
+  console.log(`Selected: ${key}`);
+  activeIndex.value=key;
+  router.push({
+    path:"/"+key
+  })
+};
+
+onMounted(() => {
+  activeIndex.value = route.name || 'EntityDesign'; // 使用当前的路由名称或默认值
+});
+
+
+// export default {
+//   name: 'Navbar',
+//   props:{
+//     title: {
+//       type: String,
+//       required: true
+//     }
+//   },
+//   setup(props){
+//     const router = useRouter()
+//     const route = useRoute()
+//     const activeIndex = ref('EntityDesign') // 默认选中的菜单项
+//     const NavTitle = props.title
+//
+//
+//     // onMounted(()=>{
+//     //   title.value=defineProps({
+//     //     title: {
+//     //       type: String,
+//     //       required: true
+//     //     }
+//     //   });
+//     // })
+//
+//     const handleSelect = (key) => {
+//       console.log(`Selected: ${key}`);
+//       activeIndex.value=key;
+//       router.push({
+//         path:"/"+key
+//       })
+//     };
+//
+//     return{
+//       activeIndex,
+//       NavTitle,
+//       handleSelect,
+//     }
+//   }
+// }
+
+</script>
   
-  <style scoped >
- .Navbar{
-  background-color: rgb(56,102,165);
-  overflow: visible;
-  height:80px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
- }
+<style scoped >
 
- .theme{
-  position:absolute;
-  left:40px;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 25px;
-  line-height: 60px;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
- }
-
- a{
-  float:left;
-  display: block;
-  color: rgba(255, 255, 255, 0.9);
-  text-align: center;
-  padding: 14px 20px;
-  text-decoration: none;
-  margin: 0 10px;
-  position: relative;
-  border-radius: 4px; 
-  transition: background-color 0.3s ease;
+.title-inner {
+  padding: 15px;
   font-size: 18px;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+  font-weight: bold;
+}
+ .el-menu-vertical-demo {
+   height: 100%;
+   width: 20%;
+   overflow: visible;
+   position: fixed;
  }
 
-a:hover{
-  background-color: rgba(240, 237, 237, 0.925);
+ .custom-menu-item .el-menu-item, .custom-menu-item .el-sub-menu__title {
+   font-size: 14px; /* 保持字体大小一致 */
+   font-weight: normal; /* 保持字体粗细一致 */
+   line-height: 56px; /* 统一行高 */
+   height: 56px; /* 统一高度 */
+   padding-left: 20px; /* 设置统一的内边距 */
+   display: flex;
+   align-items: center; /* 确保内容垂直居中 */
+ }
+
+ /* 在鼠标悬停时效果 */
+ .custom-menu-item .el-menu-item:hover, .custom-menu-item .el-sub-menu__title:hover {
+   background-color: #f0f0f0; /* 鼠标悬停时的背景色 */
+ }
+
+.custom-menu-item .el-menu-item:hover, .custom-menu-item .el-sub-menu__title:active {
+  background-color: #f0f0f0; /* 鼠标点击时的背景色 */
 }
 
+ /* 去除箭头的内边距，保证一致性 */
+ .custom-menu-item .el-sub-menu__title i {
+   margin-right: 10px;
+ }
 
+ .el-sub-menu :deep(.el-sub-menu__icon-arrow) {
+   .el-icon-arrow-down {
+     display: none;
+   }
+ }
 
-.menu {
-  position: absolute;
-  right: 40px;
-  margin-left: auto; /* 将菜单字段推到右端 */
+.el-aside {
+ background-color: #fff !important;
+ margin-right: 10px;
+}
+.el-menu {
+ border-right: solid 1px #fff;
+}
+.el-menu-item {
+ width: 92%;
+ margin: 0 auto;
+ padding: 0 10px !important;
+ height: 40px;
+ line-height: 40px;
+ font-size: 13px;
+}
+.el-menu-item > i {
+ margin-right: 30px !important;
+}
+.el-menu-item:focus,
+.el-menu-item:hover {
+ outline: 0;
+ background-color: #f0f0f0 !important;
 }
 
-.menu-label {
-  color: rgba(255, 255, 255, 0.8); /* 使用稍透明的白色 */
-  font-size: 20px;
-  cursor: pointer; /* 鼠标悬停时显示指针光标 */
+.el-menu-item.is-active {
+  background-color: rgba(0, 0, 0, 0);
 }
-
-.dropdown {
-  display: none; /* 初始隐藏下拉菜单 */
-  position: absolute;
-  top: 100%; /* 使下拉菜单出现在菜单字段下方 */
-  right: 0; /* 对齐到菜单字段的右侧 */
-  background-color: rgb(56, 102, 165);
-  border-radius: 4px; /* 添加圆角效果 */
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3); /* 添加阴影效果 */
-  white-space: nowrap; /* 防止文本换行 */
+.logout-fix {
+ position: fixed;
+ left: 30px;
+ bottom: 20px;
 }
-
-.menu:hover .dropdown {
-  display: block; /* 鼠标悬浮时显示下拉菜单 */
+.logout-fix .logout-name {
+ min-width: 60px;
+ background-color: #7e57c2 !important;
+ border-color: #7e57c2 !important;
+ color: #fff;
+ border-radius: 16px;
+ font-size: 14px;
+ height: 32px;
+ text-align: center;
+ padding: 0 10px;
+ margin-left: -10px;
+ line-height: 32px;
+ margin-bottom: 14px;
+ cursor: pointer;
 }
-
-.dropdown a {
-  display: block;
-  padding: 10px 20px;
-  color: rgba(242, 241, 241, 0.8); /* 使用稍透明的白色 */
-  text-decoration: none;
+.logout-fix .logout {
+ color: #00000099;
+ font-size: 14px;
+ cursor: pointer;
+}
+.logout-fix .logout:hover {
+ color: #000000;
 }
 </style>
