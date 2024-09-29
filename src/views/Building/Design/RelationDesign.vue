@@ -102,11 +102,7 @@
 <script lang="ts">
 import Navbar from "@/components/Navbar.vue";
 import {computed, onMounted, ref} from 'vue';
-<<<<<<< HEAD
 import type { ComponentSize } from 'element-plus'; 
-=======
-import type { ComponentSize } from 'element-plus';
->>>>>>> shenjiaxu
 import {reactive} from "@vue/runtime-core";
 
 export default {
