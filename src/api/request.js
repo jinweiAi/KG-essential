@@ -6,8 +6,13 @@ const request = Axios.create({
 })
 
 request.interceptors.request.use(config => {
+    // if (config instanceof FormData) {
+    //     // config.headers['Content-Type'] = 'multipart/form-data';
+    //     console.log("config instanceof FormData")
+    // }else {
+    //     config.headers['Content-Type'] = 'application/json;charset=utf-8';
+    // }
     config.headers['Content-Type'] = 'application/json;charset=utf-8';
-
     config.headers['Authorization'] = window.sessionStorage.getItem('token') === null ? null : window.sessionStorage.getItem('token')
 
     return config

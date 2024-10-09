@@ -1,11 +1,66 @@
 <template>
-  <Navbar />
+  <Navbar :title="title"/>
   <div class="content-container">
-    <span>unstructural-data</span>
+    <div class="design"><strong>{{buildMethod}}</strong>/非结构化数据</div>
+<!--    <el-card style="background-color: rgba(169,169,169,0.1)">-->
+<!--      <el-row :gutter="20">-->
+<!--        <el-col :span="12" class="button-block">-->
+<!--          <el-button type="primary" class="button-box">添加文件</el-button>-->
+<!--          <el-button type="primary" class="button-box">模块下载</el-button>-->
+<!--          <el-button type="primary" class="button-box">批量删除</el-button>-->
+<!--          <el-button type="primary" class="button-box">批量下载</el-button>-->
+<!--        </el-col>-->
+<!--        <el-col :span="12">-->
+<!--          <el-input v-model="searchQuery" placeholder="请输入图谱名称" class="input-box">-->
+<!--            <template #append>-->
+<!--              <el-button @click="handleSearch" icon="Search"></el-button>-->
+<!--            </template>-->
+<!--          </el-input>-->
+<!--        </el-col>-->
+<!--      </el-row>-->
 
+<!--      &lt;!&ndash; 表格 &ndash;&gt;-->
+<!--      <el-table-->
+<!--          v-model:selection="multipleSelection"-->
+<!--          :data="tableData"-->
+<!--          @selection-change="handleSelectionChange"-->
+<!--          stripe-->
+<!--          class="table-box"-->
+<!--      >-->
+<!--        <el-table-column type="selection" width="40"></el-table-column>-->
+<!--        <el-table-column prop="id" label="序号" width="60"></el-table-column>-->
+<!--        <el-table-column prop="name" label="文件名称" min-width="200"></el-table-column>-->
+<!--        <el-table-column prop="type" label="文件类型" width="120"></el-table-column>-->
+<!--        <el-table-column prop="size" label="文件大小" width="80"></el-table-column>-->
+<!--        <el-table-column prop="uploader" label="更新人" width="150"></el-table-column>-->
+<!--        <el-table-column prop="uploadTime" label="更新时间" width="220"></el-table-column>-->
+
+<!--        &lt;!&ndash; 操作列 &ndash;&gt;-->
+<!--        <el-table-column fixed="right" label="操作" width="150">-->
+<!--          <template #default="scope" >-->
+<!--            <el-link type="primary" class="operation" @click="previewFile(scope.row)">预览</el-link>-->
+<!--            <el-link type="success" class="operation" @click="downloadFile(scope.row)">下载</el-link>-->
+<!--            <el-link type="danger" class="operation" @click="deleteFile(scope.row)">删除</el-link>-->
+<!--          </template>-->
+<!--        </el-table-column>-->
+<!--      </el-table>-->
+
+<!--      <div class="demo-pagination-block">-->
+<!--        <el-pagination-->
+<!--            v-model:current-page="currentPage"-->
+<!--            v-model:page-size="pageSize"-->
+<!--            :page-sizes="[10, 20, 50, 100]"-->
+<!--            :size="size"-->
+<!--            layout="total, sizes, prev, pager, next, jumper"-->
+<!--            :total=tableData.length-->
+<!--            @size-change="handleSizeChange"-->
+<!--            @current-change="handleCurrentChange"-->
+<!--        />-->
+<!--      </div>-->
+
+<!--    </el-card>-->
 
   </div>
-
 
 </template>
 
@@ -16,7 +71,16 @@
 
   export default {
     name:"UnstructuralData",
-    components: {Navbar}
+    components: {Navbar},
+    setup(){
+      const title = localStorage.getItem('ProjectName');
+      const buildMethod = (localStorage.getItem('ProjectBuild')==="custom")?"自定义构建":"模版构建";
+
+      return {
+        title,
+        buildMethod,
+      }
+    }
   };
 </script>
 
@@ -26,6 +90,15 @@
   padding: 20px;
   flex-grow: 1; /* 内容部分占据剩余的宽度 */
   overflow-y: auto; /* 如果内容超出页面高度，允许滚动 */
+}
+
+.design {
+  font-size: 15px;
+  padding: 15px;
+  background-color: #fef9f9;
+  border:1px solid;
+  box-sizing: border-box;
+  margin-bottom: 15px;
 }
 
 </style>

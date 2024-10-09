@@ -62,7 +62,7 @@
 
   <!--创建图谱对话框-->
   <el-dialog v-model="createDialogVisible" width="40%" draggable>
-    <template #title>
+    <template #header>
       <span style="font-size: 24px;font-weight: bold;">新建图谱</span>
     </template>
     <el-form :model="createForm" :rules="rules" style="padding: 20px">
@@ -88,7 +88,7 @@
 
   <!--编辑图谱对话框-->
   <el-dialog v-model="editDialogVisible" width="40%" draggable>
-    <template #title>
+    <template #header>
       <span style="font-size: 24px;font-weight: bold;">修改图谱</span>
     </template>
     <el-form :model="editedGraph" :rules="rules" style="padding: 20px">
@@ -166,7 +166,7 @@ export default {
     const handleSearch=() => {
       if (searchQuery.value) {
         graphData.value=[];
-        for (var i=0;i<allGraphData.value.length;i++) {
+        for (let i=0;i<allGraphData.value.length;i++) {
           if (allGraphData.value[i].name.toLowerCase().includes(searchQuery.value.toLowerCase())) {
             graphData.value.push(allGraphData.value[i]);
           }
@@ -187,7 +187,7 @@ export default {
             if (item.build==='custom'){
               build='自定义构建'
             }
-            var list={
+            let list={
               id:item.id,
               name:item.name,
               mode:build,
@@ -353,6 +353,7 @@ export default {
       });
       localStorage.setItem('ProjectName', graph.name)
       localStorage.setItem('ProjectId', graph.id)
+      localStorage.setItem('ProjectBuild', graph.buildMethod)
       console.log(`进入图谱: ${name}`);
     };
 

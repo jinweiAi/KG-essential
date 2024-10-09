@@ -16,7 +16,7 @@
       <el-sub-menu index="Design">
         <template #title>
           <el-icon><Suitcase /></el-icon>
-          <span>本体设计</span>
+          <span><pre>   本体设计</pre></span>
         </template>
         <el-menu-item index="EntityDesign"><pre>  实体设计</pre></el-menu-item>
         <el-menu-item index="RelationDesign"><pre>  关系设计</pre></el-menu-item>
@@ -25,10 +25,10 @@
       <el-sub-menu index="Data">
         <template #title>
           <el-icon><Histogram /></el-icon>
-          <span>数据管理</span>
+          <span><pre>   数据管理</pre></span>
         </template>
         <el-menu-item index="StructuralData"><pre>  结构化数据</pre></el-menu-item>
-        <el-menu-item index="UnstructuralData" disabled><pre>  非结构化数据</pre></el-menu-item>
+        <el-menu-item index="UnstructuralData"><pre>  非结构化数据</pre></el-menu-item>
       </el-sub-menu>
 
       <!-- 另一个带子菜单的项 -->
