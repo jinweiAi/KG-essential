@@ -321,26 +321,24 @@ export default {
             confirmButtonText: '确认删除',
             cancelButtonText: '取消',
           }
-      )
-          .then(() => {
-            let config={
-              "id":graph.id,
-              "name":graph.name,
-              "build":graph.buildMethod,
-              "description":graph.description,
-            }
-            deleteGraph(config).then(res=>{
-              if (res.code==='00000'){
-                ElMessage({
-                  type: 'success',
-                  message: '图谱已删除',
-                })
-                allGraph();
-              }
+      ).then(() => {
+        let config={
+          "id":graph.id,
+          "name":graph.name,
+          "build":graph.buildMethod,
+          "description":graph.description,
+        }
+        deleteGraph(config).then(res=>{
+          if (res.code==='00000'){
+            ElMessage({
+              type: 'success',
+              message: '图谱已删除',
             })
+            allGraph();
+          }
+        })
 
-          })
-          .catch(() => {})
+      }).catch(() => {})
     }
 
     // 进入图谱

@@ -12,7 +12,7 @@
           <el-button type="primary" class="button-box" @click="downloadMulti">批量下载</el-button>
         </el-col>
         <el-col :span="12">
-          <el-input v-model="searchQuery" placeholder="请输入图谱名称" class="input-box" @input="handleSearch">
+          <el-input v-model="searchQuery" placeholder="按文件名称搜索" class="input-box" @input="handleSearch">
             <template #prepend>
               <el-icon><Search /></el-icon>
             </template>
@@ -122,7 +122,6 @@
 
 <!--<script type="text/javascript" src="https://cdn.bootcss.com/qs/6.7.0/qs.min.js"></script>-->
 <script >
-
 import Navbar from "@/components/Navbar.vue";
 import {computed, onMounted, ref} from 'vue';
 import {getAllFile, deleteFileById, downloadOne, downloadFiles} from "@/api/index.js"

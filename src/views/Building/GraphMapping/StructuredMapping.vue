@@ -5,12 +5,12 @@
     <el-card style="background-color: rgba(169,169,169,0.1)">
       <el-row :gutter="20">
         <el-col :span="12">
-          <el-button type="primary" class="button-box">添加任务</el-button>
+          <el-button type="primary" class="button-box" @click="createDialogVisible = true">添加任务</el-button>
         </el-col>
         <el-col :span="12">
-          <el-input v-model="searchQuery" placeholder="请输入任务名称" class="input-box">
-            <template #append>
-              <el-button @click="handleSearch" icon="Search"></el-button>
+          <el-input v-model="searchQuery" placeholder="按任务名称搜索" class="input-box" @input="handleSearch">
+            <template #prepend>
+              <el-button icon="Search"></el-button>
             </template>
           </el-input>
         </el-col>
@@ -18,14 +18,14 @@
 
       <!-- 表格 -->
       <el-table
-          :data="tableData"
+          :data="searchedTask"
           stripe
           class="table-box"
       >
         <el-table-column prop="id" label="序号" width="60"></el-table-column>
         <el-table-column prop="name" label="任务名称" width="100"></el-table-column>
         <el-table-column prop="type" label="文件类型" width="120"></el-table-column>
-        <el-table-column prop="source" label="数据来源" width="150" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="sourceName" label="数据来源" width="150" show-overflow-tooltip></el-table-column>
         <el-table-column prop="description" label="任务描述" min-width="120" show-overflow-tooltip></el-table-column>
         <el-table-column prop="status" label="状态" width="80"></el-table-column>
         <el-table-column prop="uploadTime" label="更新时间" width="200"></el-table-column>
@@ -33,9 +33,9 @@
         <!-- 操作列 -->
         <el-table-column fixed="right" label="操作" width="150">
           <template #default="scope" >
-            <el-link type="primary" class="operation" @click="previewFile(scope.row)">预览</el-link>
-            <el-link type="success" class="operation" @click="downloadFile(scope.row)">抽取</el-link>
-            <el-link type="danger" class="operation" @click="deleteFile(scope.row)">删除</el-link>
+            <el-link type="primary" class="operation" @click="editTask(scope.row)">编辑</el-link>
+            <el-link type="success" class="operation" @click="doTask(scope.row)">抽取</el-link>
+            <el-link type="danger" class="operation" @click="deleteTask(scope.row)">删除</el-link>
           </template>
         </el-table-column>
       </el-table>
@@ -47,22 +47,96 @@
             :page-sizes="[10, 20, 50, 100]"
             :size="size"
             layout="total, sizes, prev, pager, next, jumper"
-            :total=tableData.length
+            :total=searchedTask.length
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
         />
       </div>
-
     </el-card>
 
+    <!--创建任务对话框-->
+    <el-dialog v-model="createDialogVisible" width="40%" draggable>
+      <template #header>
+        <span style="font-size: 24px;font-weight: bold;">新建任务</span>
+      </template>
+      <el-form :model="createForm" :rules="rules" style="padding: 20px">
+        <el-form-item label="任务名称" prop="name">
+          <el-input v-model="createForm.name" style="width: 50%"/>
+        </el-form-item>
+        <el-form-item label="文件来源" prop="file">
+          <el-select v-model="createForm.file" placeholder="选择文件" style="width: 50%">
+            <template #header>
+              <el-input v-model="searchFile" placeholder="请输入文件名称">
+                <template #prepend>
+                  <el-button @click="handleFileSearch" icon="Search"></el-button>
+                </template>
+              </el-input>
+            </template>
+            <el-option
+                v-for="item in fileList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="任务描述" prop="description">
+          <el-input v-model="createForm.description" type="textarea"/>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button type="primary" @click="createTask">新建</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!--编辑任务对话框-->
+    <el-dialog v-model="editDialogVisible" width="40%" draggable>
+      <template #header>
+        <span style="font-size: 24px;font-weight: bold;">修改图谱</span>
+      </template>
+      <el-form :model="editedTask" :rules="rules" style="padding: 20px">
+        <el-form-item label="任务名称" prop="name">
+          <el-input v-model="editedTask.name" style="width: 50%"/>
+        </el-form-item>
+        <el-form-item label="文件来源" prop="file">
+          <el-select v-model="editedTask.file" placeholder="选择文件" style="width: 50%">
+            <template #header>
+              <el-input v-model="searchFile" placeholder="请输入文件名称">
+                <template #prepend>
+                  <el-button @click="handleFileSearch" icon="Search"></el-button>
+                </template>
+              </el-input>
+            </template>
+            <el-option
+                v-for="item in fileList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="任务描述" prop="description">
+          <el-input v-model="editedTask.description" type="textarea" placeholder="demo"/>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button :disabled="isContentSame" type="primary" @click="editConfirm">确认修改</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 
 </template>
 
-<script lang="ts">
+<script>
 import Navbar from "@/components/Navbar.vue";
-import { ref } from 'vue';
-import type { ComponentSize } from 'element-plus';
+import {computed, onMounted, ref} from 'vue';
+import {createNewTask, deleteTaskById, getAllFile, getAllTask, getFileInfo, updateTask} from "@/api/index.js";
+import {reactive} from "@vue/runtime-core";
+import {ElMessage, ElMessageBox} from "element-plus";
 
 export default {
   name: "StructuredMapping",
@@ -72,6 +146,65 @@ export default {
   setup(){
     const title = localStorage.getItem('ProjectName');
     const buildMethod = (localStorage.getItem('ProjectBuild')==="custom")?"自定义构建":"模版构建";
+    const graphId = localStorage.getItem('ProjectId');
+
+    //对应的文件列表
+    const fileList=ref([]);
+
+    //TODO:文件搜索功能
+    const searchFile=ref("");
+    const handleFileSearch=()=>{
+
+    }
+
+    const createDialogVisible=ref(false);
+    const createForm = reactive({
+      name: '',
+      file: '',
+      description:'',
+    });
+    const rules=ref({
+      name: [
+        { required: true, message: '任务名不能为空', trigger: 'blur' },
+      ],
+      file: [
+        { required: true, message: '请选择需要抽取文件', trigger: 'blur' },
+      ],
+      description: [
+        { required: true, message: '任务描述不能为空', trigger: 'blur' },
+      ]
+    })
+
+    const createTask=()=>{
+      console.log("createForm",createForm);
+      let config={
+        params:{
+          name:createForm.name,
+          fileId:createForm.file,
+          description:createForm.description,
+          graphId:graphId
+        }
+      }
+      createNewTask(config).then(res=>{
+        if (res.code==='00000'){
+          ElMessage({
+            message: '创建成功',
+            type: 'success', // 可以是 'success', 'warning', 'info', 'error'
+          })
+          getTaskList();
+        }else{
+          ElMessage({
+            message: '创建失败，请重试',
+            type: 'error', // 可以是 'success', 'warning', 'info', 'error'
+          })
+        }
+        createDialogVisible.value=false;
+        createForm.name='';
+        createForm.file= '';
+        createForm.description='';
+      })
+    }
+
 
     // 搜索框的数据
     const searchQuery = ref('');
@@ -79,47 +212,192 @@ export default {
     // 处理搜索事件
     const handleSearch = () => {
       console.log('搜索:', searchQuery.value);
+      if (searchQuery.value) {
+        searchedTask.value=[];
+        for (let i=0;i<originTask.value.length;i++) {
+          if (originTask.value[i].name.toLowerCase().includes(searchQuery.value.toLowerCase())) {
+            searchedTask.value.push(originTask.value[i]);
+          }
+        }
+      }else {
+        searchedTask.value = originTask.value;
+      }
+      console.log("searchedTask",searchedTask.value);
     };
 
     // 表格数据
-    const tableData = ref([
-      {
-        id: 1,
-        name: '抽取',
-        type: 'EXCEL格式',
-        source:'原材料产品.xlsx',
-        description:'xxxxxxx',
-        status:'已抽取',
-        uploadTime: '2024-06-21 11:26:54',
-      },
-      {
-        id: 2,
-        name: '抽取',
-        type: 'EXCEL格式',
-        source:'原材料产品2.xlsx',
-        description:'xxxxxxxaaaaa',
-        status:'已抽取',
-        uploadTime: '2024-06-21 11:26:54',
-      },
-    ]);
+    const originTask = ref([]);
+    const searchedTask = ref([]);
 
+    function getTaskList(){
+      let config={
+        params:{
+          graphID:graphId
+        }
+      }
+      getAllTask(config).then(res=>{
+        originTask.value=[];
+        if (res.code==='00000') {
+          console.log(res.result);
+          res.result.forEach(item => {
+            let config={
+              params:{
+                fileId:item.source
+              }
+            }
+            getFileInfo(config).then(res=>{
+              if(res.code==='00000'){
+                let taskStatus;
+                if (item.status==='waiting'){
+                  taskStatus='未抽取';
+                }else if(item.status==='success'){
+                  taskStatus='已抽取';
+                }else if(item.status==='error'){
+                  taskStatus='抽取失败';
+                }else{
+                  taskStatus='抽取中';
+                }
+                let list = {
+                  id: item.id,
+                  name: item.name,
+                  type: item.type,
+                  sourceId:item.source,
+                  sourceName: res.result.name,
+                  description: item.description,
+                  status: taskStatus,
+                  uploadTime: item.updateTime,
+                }
+                originTask.value.push(list);
+              }
+            })
+          })
+          console.log("originTask", originTask.value);
+          searchedTask.value=originTask.value;
+        }
+      })
+    }
+
+    function getFile(){
+      let config={
+        params:{
+          graphID:graphId
+        }
+      }
+      getAllFile(config).then(res=>{
+        if (res.code==='00000') {
+          console.log(res.result);
+          res.result.forEach(item => {
+            let list = {
+              id: item.id,
+              name: item.name,
+            }
+            fileList.value.push(list);
+          })
+          console.log("fileList", fileList.value);
+        }
+      })
+    }
+
+    onMounted(()=>{
+      getTaskList();
+      getFile();
+    })
+
+    
     // 操作处理函数
-    const previewFile = (row) => {
-      console.log('预览文件: ', row.name);
+    const editDialogVisible=ref(false);
+    const editedTask=reactive({
+      id:'',
+      name: '',
+      file: '',
+      description:'',
+    })
+    const preTask=ref({
+      id:'',
+      name: '',
+      file: '',
+      description:'',
+    });
+    const editTask = (row) => {
+      console.log('编辑任务: ', row);
+      editDialogVisible.value=true;
+      preTask.id=editedTask.id=row.id;
+      preTask.name=editedTask.name=row.name;
+      preTask.description=editedTask.description=row.description;
+      preTask.file=editedTask.file=row.sourceId;
     };
 
-    const downloadFile = (row) => {
-      console.log('下载文件: ', row.name);
+    // 计算属性判断当前输入的内容是否与原内容相同
+    const isContentSame = computed(() => {
+      return  editedTask.name === preTask.name && editedTask.file === preTask.file && editedTask.description === preTask.description;
+    });
+    const editConfirm=()=>{
+      console.log("editedTask",editedTask)
+      let config={
+        params:{
+          id:editedTask.id,
+          name:editedTask.name,
+          fileId:editedTask.file,
+          description:editedTask.description,
+          graphId:graphId,
+        }
+      }
+      updateTask(config).then(res=>{
+        if (res.code==='00000') {
+          ElMessage({
+            message: '修改成功',
+            type: 'success', // 可以是 'success', 'warning', 'info', 'error'
+          })
+          getTaskList();
+        }else{
+          ElMessage({
+            message: '失败，请重试！',
+            type: 'error', // 可以是 'success', 'warning', 'info', 'error'
+          })
+        }
+        editDialogVisible.value=false;
+      })
+    }
+
+    //TODO:抽取核心功能实现
+    const doTask = (row) => {
+      console.log('抽取: ', row);
     };
 
-    const deleteFile = (row) => {
-      console.log('删除文件: ', row.name);
+    const deleteTask = (row) => {
+      console.log('删除任务: ', row);
+      ElMessageBox.confirm(
+          '是否删除该任务？',
+          {
+            confirmButtonText: '确认删除',
+            cancelButtonText: '取消',
+          }
+      ).then(() =>{
+        let config={
+          params:{id:row.id}
+        }
+        deleteTaskById(config).then(res=>{
+          if (res.code==='00000') {
+            ElMessage({
+              message: '删除成功',
+              type: 'success', // 可以是 'success', 'warning', 'info', 'error'
+            })
+            getTaskList();
+          }else{
+            ElMessage({
+              message: '失败，请重试！',
+              type: 'error', // 可以是 'success', 'warning', 'info', 'error'
+            })
+          }
+        })
+      }).catch(() => {})
     };
 
+
+    /** 分页 **/
     const currentPage = ref(1)
     const pageSize = ref(100)
-
-    const size = ref<ComponentSize>('small')
+    const size = ref('small')
     // 处理分页
     const handleSizeChange = (size) => {
       console.log(`${size} items per page`)
@@ -131,12 +409,32 @@ export default {
     return{
       title,
       buildMethod,
+
+      fileList,
+      searchFile,
+      handleFileSearch,
+
+      createDialogVisible,
+      createForm,
+      rules,
+      createTask,
+      
       searchQuery,
       handleSearch,
-      tableData,
-      previewFile,
-      downloadFile,
-      deleteFile,
+
+      originTask,
+      searchedTask,
+
+      editDialogVisible,
+      editedTask,
+      editTask,
+      preTask,
+      isContentSame,
+      editConfirm,
+
+      deleteTask,
+      doTask,
+      
       handleSizeChange,
       handleCurrentChange,
       currentPage,
