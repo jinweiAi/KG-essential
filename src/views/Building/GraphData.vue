@@ -97,11 +97,10 @@
   </div>
 </template>
 
-<script  lang="ts">
+<script>
 
 import Navbar from "@/components/Navbar.vue";
 import {computed, onMounted, ref} from 'vue';
-import type { ComponentSize } from 'element-plus';
 import {reactive} from "@vue/runtime-core";
 
 export default {
@@ -139,7 +138,7 @@ export default {
     const currentPage = ref(1)
     const pageSize = ref(100)
 
-    const size = ref<ComponentSize>('small')
+    const size = ref('small')
     // 处理分页
     const handleSizeChange = (size) => {
       console.log(`${size} items per page`)

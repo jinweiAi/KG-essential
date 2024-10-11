@@ -27,8 +27,8 @@
           <el-icon><Histogram /></el-icon>
           <span><pre>   数据管理</pre></span>
         </template>
-        <el-menu-item index="StructuralData"><pre>  结构化数据</pre></el-menu-item>
-        <el-menu-item index="UnstructuralData"><pre>  非结构化数据</pre></el-menu-item>
+        <el-menu-item index="StructuralData" :disabled="buildMethod==='自定义构建'"><pre>  结构化数据</pre></el-menu-item>
+        <el-menu-item index="UnstructuralData" :disabled="buildMethod==='模版构建'"><pre>  非结构化数据</pre></el-menu-item>
       </el-sub-menu>
 
       <!-- 另一个带子菜单的项 -->
@@ -37,8 +37,8 @@
           <el-icon><DataLine /></el-icon>
           <span><pre>   图谱映射</pre></span>
         </template>
-        <el-menu-item index="StructuredMapping"><pre>  结构化映射</pre></el-menu-item>
-        <el-menu-item index="UnstructuredMapping"><pre>  非结构化映射</pre></el-menu-item>
+        <el-menu-item index="StructuredMapping" :disabled="buildMethod==='自定义构建'"><pre>  结构化映射</pre></el-menu-item>
+        <el-menu-item index="UnstructuredMapping" :disabled="buildMethod==='模版构建'"><pre>  非结构化映射</pre></el-menu-item>
       </el-sub-menu>
 
       <!-- 没有子菜单的菜单项 -->
@@ -53,7 +53,14 @@
           <span>图谱详情</span>
         </template>
       </el-menu-item>
+
+      <div class="out_container">
+        <el-button class="out_button" size="large" @click="out2GraphListPage">退出当前图谱</el-button>
+      </div>
+
     </el-menu>
+
+
 
   </el-aside>
 
@@ -103,7 +110,11 @@ import {reactive, shallowRef} from "@vue/runtime-core";
 const router = useRouter()
 const route = useRoute()
 const activeIndex = ref('EntityDesign') // 默认选中的菜单项
-const title = ref('')
+const title = localStorage.getItem('ProjectName')
+const buildMethod = localStorage.getItem('ProjectBuild');
+
+console.log("buildMethod",buildMethod)
+
 // defineProps({
 //   title: {
 //     type: String,
@@ -112,7 +123,6 @@ const title = ref('')
 // });
 
 onMounted(()=>{
-  title.value=localStorage.getItem('ProjectName')
   activeIndex.value = route.name || 'EntityDesign'; // 使用当前的路由名称或默认值
 })
 
@@ -123,6 +133,13 @@ const handleSelect = (key) => {
     path:"/"+key
   })
 };
+
+const out2GraphListPage=()=>{
+  console.log("out2GraphListPage")
+  router.push({
+    path: '/',
+  });
+}
 
 // const Array=[
 //   {
@@ -243,33 +260,33 @@ const handleSelect = (key) => {
 </script>
 
 <style scoped >
-
 .title-inner {
   padding: 15px;
   font-size: 18px;
   font-weight: bold;
 }
- .el-menu-vertical-demo {
-   height: 100%;
-   width: 20%;
-   overflow: visible;
-   position: fixed;
- }
 
- .custom-menu-item el-menu-item, .custom-menu-item el-sub-menu__title {
-   font-size: 14px; /* 保持字体大小一致 */
-   font-weight: normal; /* 保持字体粗细一致 */
-   line-height: 56px; /* 统一行高 */
-   height: 56px; /* 统一高度 */
-   padding-left: 20px; /* 设置统一的内边距 */
-   display: flex;
-   align-items: center; /* 确保内容垂直居中 */
- }
+.el-menu-vertical-demo {
+ height: 100%;
+ width: 20%;
+ overflow: visible;
+ position: fixed;
+}
 
- /* 在鼠标悬停时效果 */
- .custom-menu-item el-menu-item:hover, .custom-menu-item el-sub-menu__title:hover {
-   background-color: #f0f0f0; /* 鼠标悬停时的背景色 */
- }
+.custom-menu-item el-menu-item, .custom-menu-item el-sub-menu__title {
+ font-size: 14px; /* 保持字体大小一致 */
+ font-weight: normal; /* 保持字体粗细一致 */
+ line-height: 56px; /* 统一行高 */
+ height: 56px; /* 统一高度 */
+ padding-left: 20px; /* 设置统一的内边距 */
+ display: flex;
+ align-items: center; /* 确保内容垂直居中 */
+}
+
+/* 在鼠标悬停时效果 */
+.custom-menu-item el-menu-item:hover, .custom-menu-item el-sub-menu__title:hover {
+ background-color: #f0f0f0; /* 鼠标悬停时的背景色 */
+}
 
 .custom-menu-item el-menu-item:hover, .custom-menu-item el-sub-menu__title:active {
   background-color: #f0f0f0; /* 鼠标点击时的背景色 */
@@ -340,5 +357,17 @@ el-menu-item.is-active {
 }
 .logout-fix .logout:hover {
  color: #000000;
+}
+
+.out_container {
+  width: 20%;
+  position: fixed;
+  bottom: 50px;
+  display: flex; /* 启用 flexbox 布局 */
+  justify-content: center; /* 水平居中 */
+}
+
+.out_button {
+  border: none;
 }
 </style>

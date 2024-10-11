@@ -75,7 +75,7 @@
   </div>
 
   <el-dialog v-model="dialogFormVisible" width="40%" draggable>
-    <template #title>
+    <template #header>
       <span style="font-size: 24px;font-weight: bold;">添加关系</span>
     </template>
     <el-form :model="createForm"  style="padding: 20px">
@@ -99,10 +99,9 @@
 </template>
 
 
-<script lang="ts">
+<script>
 import Navbar from "@/components/Navbar.vue";
-import {computed, onMounted, ref} from 'vue';
-import type { ComponentSize } from 'element-plus';
+import {computed,  ref} from 'vue';
 import {reactive} from "@vue/runtime-core";
 
 export default {
@@ -144,7 +143,7 @@ export default {
     const currentPage = ref(1)
     const pageSize = ref(100)
 
-    const size = ref<ComponentSize>('small')
+    const size = ref('small')
     // 处理分页
     const handleSizeChange = (size) => {
       console.log(`${size} items per page`)
@@ -181,10 +180,13 @@ export default {
       tableData,
       editItem,
       deleteItem,
+
       currentPage,
       pageSize,
+      size,
       handleCurrentChange,
       handleSizeChange,
+
       dialogFormVisible,
       createForm,
       addRelation,

@@ -84,7 +84,7 @@
 
   <!-- 编辑和添加对话框 -->
   <el-dialog v-model="entityDialogVisible" width="40%" draggable>
-    <template #title>
+    <template #header>
       <span style="font-size: 24px; font-weight: bold;">{{ isEditEntity ? '编辑实体类型' : '添加实体类型' }}</span>
     </template>
     <el-form :model="editEntityForm" style="padding: 20px">
@@ -107,7 +107,7 @@
 
   <!-- 添加属性对话框 -->
   <el-dialog v-model="attributeDialogVisible" width="40%" draggable>
-    <template #title>
+    <template #header>
       <span style="font-size: 24px; font-weight: bold;">{{ isEditAttribute ? '编辑实体属性' : '添加实体属性' }}</span>
     </template>
     <el-form :model="editAttributeForm" style="padding: 20px">
@@ -129,10 +129,9 @@
   </el-dialog>
 </template>
 
-<script lang="ts">
+<script>
 import Navbar from "@/components/Navbar.vue";
 import { ref } from 'vue';
-import {onMounted} from 'vue';
 import { useRouter, useRoute } from 'vue-router'
 
 export default {
@@ -225,6 +224,18 @@ export default {
       attributeDialogVisible.value = false; // 关闭对话框
     };
 
+    const currentPage = ref(1)
+    const pageSize = ref(100)
+
+    const size = ref('small')
+    // 处理分页
+    const handleSizeChange = (size) => {
+      console.log(`${size} items per page`)
+    }
+    const handleCurrentChange = (page) => {
+      console.log(`current page: ${page}`)
+    }
+
     return {
       title,
       buildMethod,
@@ -243,7 +254,13 @@ export default {
       openAddAttributeDialog,
       editAttribute,
       saveAttributeEdit,
-      addAttribute
+      addAttribute,
+
+      currentPage,
+      pageSize,
+      size,
+      handleCurrentChange,
+      handleSizeChange,
     };
   }
 };

@@ -343,6 +343,7 @@ export default {
 
     // 进入图谱
     const enterGraph = (graph) => {
+      console.log('graph',graph);
       router.push({
         path: '/EntityDesign',
         query:{
@@ -351,7 +352,7 @@ export default {
       });
       localStorage.setItem('ProjectName', graph.name)
       localStorage.setItem('ProjectId', graph.id)
-      localStorage.setItem('ProjectBuild', graph.buildMethod)
+      localStorage.setItem('ProjectBuild', graph.mode)
       console.log(`进入图谱: ${name}`);
     };
 
