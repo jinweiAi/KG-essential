@@ -45,11 +45,11 @@
 
       <!-- 表格 -->
       <el-table :data="tableData" class="table-box" stripe>
-        <el-table-column prop="relationName" label="关系名称" min-width="100" align="center"></el-table-column>
-        <el-table-column prop="startEntityType" label="起始实体类型" min-width="100" align="center"></el-table-column>
-        <el-table-column prop="endEntityType" label="结束实体类型" min-width="100" align="center"></el-table-column>
+        <el-table-column prop="relationName" label="关系名称" min-width="100" align="center" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="startEntityType" label="起始实体类型" min-width="100" align="center" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="endEntityType" label="结束实体类型" min-width="100" align="center" show-overflow-tooltip></el-table-column>
         <!-- 操作列 -->
-        <el-table-column fixed="right" label="操作" width="120"  align="center">
+        <el-table-column fixed="right" label="操作" width="200"  align="center" show-overflow-tooltip>
           <template #default="scope">
             <el-link type="primary" @click="editItem(scope.row)" class="operation">编辑</el-link>
             <el-link type="danger" @click="deleteItem(scope.row)" class="operation">删除</el-link>

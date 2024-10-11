@@ -55,7 +55,7 @@
       </el-menu-item>
 
       <div class="out_container">
-        <el-button class="out_button" size="large" @click="out2GraphListPage">退出当前图谱</el-button>
+        <el-button type="text" class="out_button" size="large" @click="out2GraphListPage">退出当前图谱</el-button>
       </div>
 
     </el-menu>
@@ -369,5 +369,7 @@ el-menu-item.is-active {
 
 .out_button {
   border: none;
+  color: #fff;
+  background-color: rgb(56, 102, 165);
 }
 </style>

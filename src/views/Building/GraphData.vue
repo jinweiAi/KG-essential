@@ -9,11 +9,10 @@
 
     <el-card style="background-color: rgba(169,169,169,0.1)">
       <el-row>
-
         <el-col :span="11" style="margin-right: 20px;">
           <el-row>
             <el-col :span="12">
-              <span class="entitytable">实体列表</span>
+              <span class="title">实体列表</span>
             </el-col>
             <el-col :span="12" style="text-align: right;">
               <!-- <el-button type="primary" class="button-box" @click="dialogFormVisible = true">添加实体类型</el-button> -->
@@ -29,10 +28,10 @@
                 class="table-box"
                 style="width: 100%;"
             >
-              <el-table-column prop="entityname" label="实体名称" ></el-table-column>
-              <el-table-column prop="entityclass" label="实体类型"></el-table-column>
+              <el-table-column prop="entityName" label="实体名称" align="center" show-overflow-tooltip></el-table-column>
+              <el-table-column prop="entityClass" label="实体类型" align="center" show-overflow-tooltip></el-table-column>
               <!-- 操作列 -->
-              <el-table-column fixed="right" label="操作" >
+              <el-table-column fixed="right" label="操作" align="center" show-overflow-tooltip>
                 <template #default="scope" >
                   <el-link type="primary" class="operation" @click="previewFile(scope.row)">属性</el-link>
                   <span style="margin: 0 8px;"> </span>
@@ -42,13 +41,25 @@
 
             </el-table>
           </el-row>
+          <div class="demo-pagination-block">
+            <el-pagination
+                v-model:current-page="currentPage1"
+                v-model:page-size="pageSize1"
+                :page-sizes="[10, 20, 50, 100]"
+                :size="size"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="entityTable.length"
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+            />
+          </div>
         </el-col>
 
 
         <el-col :span="12">
           <el-row>
             <el-col :span="12">
-              <span class="relationtable">关系列表</span>
+              <span class="title">关系列表</span>
             </el-col>
             <el-col :span="12" style="text-align: right;">
               <!-- <el-button type="primary" class="button-box" @click="dialogFormVisible = true">添加实体属性</el-button> -->
@@ -64,12 +75,12 @@
                 stripe
                 class="table-box"
             >
-              <el-table-column prop="relationname" label="关系名称" ></el-table-column>
-              <el-table-column prop="beginentity" label="起始实体" ></el-table-column>
-              <el-table-column prop="targetentity" label="目标实体"></el-table-column>
+              <el-table-column prop="relationName" label="关系名称" align="center" show-overflow-tooltip></el-table-column>
+              <el-table-column prop="beginEntity" label="起始实体" align="center" show-overflow-tooltip></el-table-column>
+              <el-table-column prop="targetEntity" label="目标实体" align="center" show-overflow-tooltip></el-table-column>
 
               <!-- 操作列 -->
-              <el-table-column fixed="right" label="操作">
+              <el-table-column fixed="right" label="操作" align="center" show-overflow-tooltip>
                 <template #default="scope" >
                   <el-link type="danger" class="operation" @click="deleteFile(scope.row)">删除</el-link>
                 </template>
@@ -77,21 +88,22 @@
 
             </el-table>
           </el-row>
+          <div class="demo-pagination-block">
+            <el-pagination
+                v-model:current-page="currentPage2"
+                v-model:page-size="pageSize2"
+                :page-sizes="[10, 20, 50, 100]"
+                :size="size"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="relationTable.length"
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+            />
+          </div>
         </el-col>
       </el-row>
 
-      <div class="demo-pagination-block">
-        <el-pagination
-            v-model:current-page="currentPage"
-            v-model:page-size="pageSize"
-            :page-sizes="[10, 20, 50, 100]"
-            :size="size"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="entityTable.length"
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-        />
-      </div>
+
 
     </el-card>
   </div>
@@ -115,29 +127,31 @@ export default {
 
     const entityTable=ref(
         [
-          {entityname:"李四",entityclass:"产品"},
-          {entityname:"王五",entityclass:"产品"},
-          {entityname:"赵六",entityclass:"产品"},
-          {entityname:"张三",entityclass:"产品"},
-          {entityname:"南京",entityclass:"城市"},
-          {entityname:"浦口",entityclass:"城市"},
-          {entityname:"徐州",entityclass:"城市"},
-          {entityname:"北京",entityclass:"城市"},
+          {entityName:"李四",entityClass:"产品"},
+          {entityName:"王五",entityClass:"产品"},
+          {entityName:"赵六",entityClass:"产品"},
+          {entityName:"张三",entityClass:"产品"},
+          {entityName:"南京",entityClass:"城市"},
+          {entityName:"浦口",entityClass:"城市"},
+          {entityName:"徐州",entityClass:"城市"},
+          {entityName:"北京",entityClass:"城市"},
         ]
     )
     const input = ref('')
 
     const relationTable=ref(
         [
-          {relationname:"构成",beginentity:"浦口",targetentity:"赵刘"},
-          {relationname:"构成",beginentity:"北京",targetentity:"王五"},
-          {relationname:"构成",beginentity:"南京",targetentity:"李四"},
-          {relationname:"构成",beginentity:"徐州",targetentity:"张三"},
+          {relationName:"构成",beginEntity:"浦口",targetEntity:"赵刘"},
+          {relationName:"构成",beginEntity:"北京",targetEntity:"王五"},
+          {relationName:"构成",beginEntity:"南京",targetEntity:"李四"},
+          {relationName:"构成",beginEntity:"徐州",targetEntity:"张三"},
         ]
     )
-    const currentPage = ref(1)
-    const pageSize = ref(100)
 
+    const currentPage1 = ref(1)
+    const pageSize1 = ref(100)
+    const currentPage2 = ref(1)
+    const pageSize2 = ref(100)
     const size = ref('small')
     // 处理分页
     const handleSizeChange = (size) => {
@@ -168,8 +182,11 @@ export default {
       relationTable,
       previewFile,
       deleteFile,
-      currentPage,
-      pageSize,
+
+      currentPage1,
+      pageSize1,
+      currentPage2,
+      pageSize2,
       size,
       handleSizeChange,
       handleCurrentChange,
@@ -227,4 +244,14 @@ export default {
   display: flex;
 }
 
+
+.title {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.table-box {
+  margin-top: 15px;
+  max-height: 550px;
+}
 </style>

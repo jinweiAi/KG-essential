@@ -7,7 +7,7 @@
         <el-col :span="11" style="margin-right: 20px;">
           <el-row>
             <el-col :span="12">
-              <span class="entity">实体类型列表</span>
+              <span class="title">实体类型列表</span>
             </el-col>
             <el-col :span="12" style="text-align: right;">
               <el-button type="primary" class="button-box" @click="openAddEntityDialog">添加实体类型</el-button>
@@ -17,16 +17,16 @@
           <!-- 表格 -->
           <el-row>
             <el-table :data="tableData1" stripe class="table-box">
-              <el-table-column prop="entityclass" label="实体类型" width="100"></el-table-column>
-              <el-table-column prop="Disambiguation" label="消歧标识" width="100"></el-table-column>
-              <el-table-column prop="color" label="颜色" width="120">
+              <el-table-column prop="entityClass" label="实体类型" min-width="120" align="center" show-overflow-tooltip></el-table-column>
+              <el-table-column prop="Disambiguation" label="消歧标识" min-width="100" align="center" show-overflow-tooltip></el-table-column>
+              <el-table-column prop="color" label="颜色" min-width="120" align="center" show-overflow-tooltip>
                 <template #default="scope">
                   <div :style="{ backgroundColor: scope.row.color, width: '80px', height: '20px' }"></div>
                 </template>
               </el-table-column>
 
               <!-- 操作列 -->
-              <el-table-column fixed="right" label="操作" width="150">
+              <el-table-column fixed="right" label="操作" min-width="120" align="center" show-overflow-tooltip>
                 <template #default="scope">
                   <el-link type="primary" class="operation" @click="editEntity(scope.row)">编辑</el-link>
                   <span style="margin: 0 8px;"></span>
@@ -35,12 +35,24 @@
               </el-table-column>
             </el-table>
           </el-row>
+          <div class="demo-pagination-block">
+            <el-pagination
+                v-model:current-page="currentPage1"
+                v-model:page-size="pageSize1"
+                :page-sizes="[10, 20, 50, 100]"
+                :size="size"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="tableData1.length"
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+            />
+          </div>
         </el-col>
 
         <el-col :span="12">
           <el-row>
             <el-col :span="12">
-              <span class="attribute">属性列表</span>
+              <span class="title">属性列表</span>
             </el-col>
             <el-col :span="12" style="text-align: right;">
               <el-button type="primary" class="button-box" @click="openAddAttributeDialog">添加实体属性</el-button>
@@ -50,12 +62,12 @@
           <!-- 表格 -->
           <el-row>
             <el-table :data="tableData2" stripe class="table-box">
-              <el-table-column prop="name" label="属性名称" width="100"></el-table-column>
-              <el-table-column prop="dataclass" label="数据类型" width="100"></el-table-column>
-              <el-table-column prop="union" label="单位" width="120"></el-table-column>
+              <el-table-column prop="name" label="属性名称" min-width="120" align="center" show-overflow-tooltip></el-table-column>
+              <el-table-column prop="dataclass" label="数据类型" min-width="100" align="center" show-overflow-tooltip></el-table-column>
+              <el-table-column prop="union" label="单位" min-width="120" align="center" show-overflow-tooltip></el-table-column>
 
               <!-- 操作列 -->
-              <el-table-column fixed="right" label="操作" width="150">
+              <el-table-column fixed="right" label="操作" min-width="120" align="center" show-overflow-tooltip>
                 <template #default="scope">
                   <el-link type="primary" class="operation" @click="editAttribute(scope.row)">编辑</el-link>
                   <span style="margin: 0 8px;"></span>
@@ -64,21 +76,20 @@
               </el-table-column>
             </el-table>
           </el-row>
+          <div class="demo-pagination-block">
+            <el-pagination
+                v-model:current-page="currentPage2"
+                v-model:page-size="pageSize2"
+                :page-sizes="[10, 20, 50, 100]"
+                :size="size"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="tableData2.length"
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+            />
+          </div>
         </el-col>
       </el-row>
-
-      <div class="demo-pagination-block">
-        <el-pagination
-            v-model:current-page="currentPage"
-            v-model:page-size="pageSize"
-            :page-sizes="[10, 20, 50, 100]"
-            :size="size"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="tableData1.length"
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-        />
-      </div>
     </el-card>
   </div>
 
@@ -89,7 +100,7 @@
     </template>
     <el-form :model="editEntityForm" style="padding: 20px">
       <el-form-item label="实体类型">
-        <el-input v-model="editEntityForm.entityclass" style="width: 50%"/>
+        <el-input v-model="editEntityForm.entityClass" style="width: 50%"/>
       </el-form-item>
       <el-form-item label="消歧标识">
         <el-input v-model="editEntityForm.Disambiguation" style="width: 50%"/>
@@ -149,17 +160,17 @@ export default {
     const attributeDialogVisible = ref(false);
     const isEditEntity = ref(false); // 用于判断实体类型对话框
     const isEditAttribute = ref(false); // 用于判断属性对话框
-    const editEntityForm = ref({ entityclass: '', Disambiguation: '', color: '' });
+    const editEntityForm = ref({ entityClass: '', Disambiguation: '', color: '' });
     const editAttributeForm = ref({ name: '', dataclass: '', union: '' });
     const tableData1 = ref([
-      { entityclass: '原材料', Disambiguation: 'AA', color: '#FFFF00' }, // 黄色
-      { entityclass: '产品', Disambiguation: 'AB', color: '#00FF00' }, // 绿色
-      { entityclass: '班次', Disambiguation: 'AC', color: '#FF0000' }, // 红色
-      { entityclass: '员工', Disambiguation: 'AD', color: '#0000FF' }, // 蓝色
-      { entityclass: '设备', Disambiguation: 'AE', color: '#000000' }, // 黑色
-      { entityclass: '生产线', Disambiguation: 'AF', color: '#FFFFFF' }, // 白色
-      { entityclass: '爆破计划', Disambiguation: 'AG', color: '#800080' }, // 紫色
-      { entityclass: '加工计划', Disambiguation: 'AH', color: '#A52A2A' } // 棕色
+      { entityClass: '原材料', Disambiguation: 'AA', color: '#FFFF00' }, // 黄色
+      { entityClass: '产品', Disambiguation: 'AB', color: '#00FF00' }, // 绿色
+      { entityClass: '班次', Disambiguation: 'AC', color: '#FF0000' }, // 红色
+      { entityClass: '员工', Disambiguation: 'AD', color: '#0000FF' }, // 蓝色
+      { entityClass: '设备', Disambiguation: 'AE', color: '#000000' }, // 黑色
+      { entityClass: '生产线', Disambiguation: 'AF', color: '#FFFFFF' }, // 白色
+      { entityClass: '爆破计划', Disambiguation: 'AG', color: '#800080' }, // 紫色
+      { entityClass: '加工计划', Disambiguation: 'AH', color: '#A52A2A' } // 棕色
     ]);
 
 
@@ -173,7 +184,7 @@ export default {
     // 打开添加实体对话框
     const openAddEntityDialog = () => {
       isEditEntity.value = false; // 设置为添加模式
-      editEntityForm.value = { entityclass: '', Disambiguation: '', color: '' }; // 重置表单
+      editEntityForm.value = { entityClass: '', Disambiguation: '', color: '' }; // 重置表单
       entityDialogVisible.value = true; // 显示对话框
     };
 
@@ -185,7 +196,7 @@ export default {
     };
 
     const saveEntityEdit = () => {
-      const index = tableData1.value.findIndex(item => item.entityclass === editEntityForm.value.entityclass);
+      const index = tableData1.value.findIndex(item => item.entityClass === editEntityForm.value.entityClass);
       if (index !== -1) {
         tableData1.value[index] = editEntityForm.value; // 更新原数据
       }
@@ -224,9 +235,10 @@ export default {
       attributeDialogVisible.value = false; // 关闭对话框
     };
 
-    const currentPage = ref(1)
-    const pageSize = ref(100)
-
+    const currentPage1 = ref(1)
+    const pageSize1 = ref(100)
+    const currentPage2 = ref(1)
+    const pageSize2 = ref(100)
     const size = ref('small')
     // 处理分页
     const handleSizeChange = (size) => {
@@ -256,8 +268,10 @@ export default {
       saveAttributeEdit,
       addAttribute,
 
-      currentPage,
-      pageSize,
+      currentPage1,
+      pageSize1,
+      currentPage2,
+      pageSize2,
       size,
       handleCurrentChange,
       handleSizeChange,
@@ -288,5 +302,20 @@ export default {
   margin-bottom: 10px;
   float: right;
   display: flex;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.table-box {
+  margin-top: 15px;
+  max-height: 550px;
+}
+
+.button-box {
+  display: flex;
+  float: right;
 }
 </style>
