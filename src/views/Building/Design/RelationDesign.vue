@@ -8,101 +8,116 @@
           <span class="title">关系类型列表</span>
         </el-col>
         <el-col :span="12">
-          <el-button type="primary" class="button-box" @click="dialogFormVisible = true">添加关系列表</el-button>
+          <el-button type="primary" class="button-box" @click="openAddDialog">添加关系列表</el-button>
         </el-col>
       </el-row>
-      <el-row :gutter="20">
-        <el-col class="select-item">
-          <span>起始实体类型</span>
-          <el-select v-model="startEntityType_options" placeholder="请输入关键词" class="selector">
-            <el-option
-                v-for="(item, index) in startEntityType_options"
-                :key="index"
-                :label="item"
-                :value="item"
-            ></el-option>
-          </el-select>
-          <span>结束实体类型</span>
-          <el-select v-model="endEntityType_options" placeholder="请输入关键词" class="selector">
-            <el-option
-                v-for="(item, index) in endEntityType_options"
-                :key="index"
-                :label="item"
-                :value="item"
-            ></el-option>
-          </el-select>
-          <span>关系名称</span>
-          <el-select v-model="relationNames_options" placeholder="请输入关键词" class="selector">
-            <el-option
-                v-for="(item, index) in relationNames_options"
-                :key="index"
-                :label="item"
-                :value="item"
-            ></el-option>
-          </el-select>
-        </el-col>
-      </el-row>
+<!--      <el-row :gutter="20">-->
+<!--        <el-col class="select-item">-->
+<!--          <span>起始实体类型</span>-->
+<!--          <el-select v-model="startEntityType_options" placeholder="请输入关键词" class="selector">-->
+<!--            <el-option-->
+<!--                v-for="(item, index) in startEntityType_options"-->
+<!--                :key="index"-->
+<!--                :label="item"-->
+<!--                :value="item"-->
+<!--            ></el-option>-->
+<!--          </el-select>-->
+<!--          <span>结束实体类型</span>-->
+<!--          <el-select v-model="endEntityType_options" placeholder="请输入关键词" class="selector">-->
+<!--            <el-option-->
+<!--                v-for="(item, index) in endEntityType_options"-->
+<!--                :key="index"-->
+<!--                :label="item"-->
+<!--                :value="item"-->
+<!--            ></el-option>-->
+<!--          </el-select>-->
+<!--          <span>关系名称</span>-->
+<!--          <el-select v-model="relationNames_options" placeholder="请输入关键词" class="selector">-->
+<!--            <el-option-->
+<!--                v-for="(item, index) in relationNames_options"-->
+<!--                :key="index"-->
+<!--                :label="item"-->
+<!--                :value="item"-->
+<!--            ></el-option>-->
+<!--          </el-select>-->
+<!--        </el-col>-->
+<!--      </el-row>-->
 
       <!-- 表格 -->
-      <el-table :data="tableData" class="table-box" stripe>
-        <el-table-column prop="relationName" label="关系名称" min-width="100" align="center" show-overflow-tooltip></el-table-column>
-        <el-table-column prop="startEntityType" label="起始实体类型" min-width="100" align="center" show-overflow-tooltip></el-table-column>
-        <el-table-column prop="endEntityType" label="结束实体类型" min-width="100" align="center" show-overflow-tooltip></el-table-column>
-        <!-- 操作列 -->
-        <el-table-column fixed="right" label="操作" width="200"  align="center" show-overflow-tooltip>
-          <template #default="scope">
-            <el-link type="primary" @click="editItem(scope.row)" class="operation">编辑</el-link>
-            <el-link type="danger" @click="deleteItem(scope.row)" class="operation">删除</el-link>
-          </template>
-        </el-table-column>
-      </el-table>
+      <el-col class="noWrapOverflowX">
+        <el-table :data="tripleList" class="table-box" stripe>
+          <el-table-column prop="relation" label="关系名称" min-width="100" align="center" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="startEntity" label="起始实体类型" min-width="100" align="center" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="endEntity" label="结束实体类型" min-width="100" align="center" show-overflow-tooltip></el-table-column>
+          <!-- 操作列 -->
+          <el-table-column fixed="right" label="操作" width="200"  align="center" show-overflow-tooltip>
+            <template #default="scope">
+  <!--            <el-link type="primary" @click="editItem(scope.row)" class="operation">编辑</el-link>-->
+              <el-link type="danger" @click="deleteItem(scope.row)">删除</el-link>
+            </template>
+          </el-table-column>
+        </el-table>
 
-
-      <div class="demo-pagination-block">
-        <el-pagination
-            v-model:current-page="currentPage"
-            v-model:page-size="pageSize"
-            :page-sizes="[10, 20, 50, 100]"
-            :size="size"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total=tableData.length
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-        />
-      </div>
-
+        <div class="demo-pagination-block">
+          <el-pagination
+              v-model:current-page="currentPage"
+              v-model:page-size="pageSize"
+              :page-sizes="[10, 20, 50, 100]"
+              :size="size"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total=tripleList.length
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+          />
+        </div>
+      </el-col>
     </el-card>
   </div>
 
   <el-dialog v-model="dialogFormVisible" width="40%" draggable>
     <template #header>
-      <span style="font-size: 24px;font-weight: bold;">添加关系</span>
+      <span style="font-size: 24px;font-weight: bold;">{{ isEdit ? '编辑关系' : '添加关系' }}</span>
     </template>
-    <el-form :model="createForm"  style="padding: 20px">
+    <el-form :model="dataForm"  style="padding: 20px" label-position="right" label-width="100px">
       <el-form-item label="起始实体类型">
-        <el-input v-model="createForm.startEntity" style="width: 50%"/>
+        <el-select v-model="dataForm.startEntity" style="width: 60%" placeholder="请选择起始实体类型">
+          <el-option
+              v-for="item in entityList"
+              :key="item.id"
+              :label="item.type"
+              :value="item.id"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="关系名称">
-        <el-input v-model="createForm.relation" style="width: 50%"/>
+        <el-input v-model="dataForm.relation" style="width: 60%"/>
       </el-form-item>
       <el-form-item label="结束实体类型">
-        <el-input v-model="createForm.endEntity" style="width: 50%"/>
+        <el-select v-model="dataForm.endEntity" style="width: 60%" placeholder="请选择结束实体类型">
+          <el-option
+              v-for="item in entityList"
+              :key="item.id"
+              :label="item.type"
+              :value="item.id"
+          />
+        </el-select>
       </el-form-item>
     </el-form>
     <template #footer>
       <div class="dialog-footer">
-        <el-button type="primary" @click="addRelation">添加</el-button>
+        <el-button type="primary" @click="handleConfirm">确认</el-button>
       </div>
     </template>
   </el-dialog>
 
 </template>
 
-
 <script>
 import Navbar from "@/components/Navbar.vue";
-import {computed,  ref} from 'vue';
+import {onMounted, ref} from 'vue';
 import {reactive} from "@vue/runtime-core";
+import {addRelationEntity, allTriple, allEntity, allRelation, deleteGraph, deleteTriple} from "@/api/index.js";
+import {ElMessage, ElMessageBox} from "element-plus";
 
 export default {
   name: "RelationDesign",
@@ -110,34 +125,178 @@ export default {
     Navbar
   },
   setup(){
-    const title = localStorage.getItem('ProjectName');
-    const buildMethod = (localStorage.getItem('ProjectBuild')==="custom")?"自定义构建":"模版构建";
+    const title = sessionStorage.getItem('ProjectName');
+    const buildMethod = (sessionStorage.getItem('ProjectBuild')==="custom")?"自定义构建":"模版构建";
+    const graphId = sessionStorage.getItem('ProjectId');
 
-    const selectedStartType = ref('');
-    const selectedEndType = ref('');
-    const selectedRelationName = ref('');
+    const entityList=ref([]);
+    const relationList=ref([]);
+    const tripleList=ref([]);
 
-    // 表格数据
-    const tableData = ref([
-      { relationName: '执行', startEntityType: '员工', endEntityType: '爆破计划' },
-      { relationName: '位于', startEntityType: '设备', endEntityType: '生产线' },
-      { relationName: '属于', startEntityType: '员工', endEntityType: '班次' },
-      { relationName: '构成', startEntityType: '原材料', endEntityType: '产品' }
-    ]);
+    function getAllEntity(){
+      let config={
+        params:{
+          graphId:graphId,
+        }
+      }
+      allEntity(config).then(res=>{
+        if (res.code==='00000') {
+          entityList.value = res.result;
+        }
+        console.log("entityList",entityList.value);
+      })
+    }
 
-    // 数据选项数组
-    const startEntityType_options = computed(() => tableData.value.map(item => item.startEntityType));
-    const endEntityType_options = computed(() => tableData.value.map(item => item.endEntityType));
-    const relationNames_options = computed(() => tableData.value.map(item => item.relationName));
+    function getAllTriple(){
+      let config={
+        params: {
+          graphId:graphId,
+        }
+      }
+      allTriple(config).then(res=>{
+        tripleList.value=[];
+        if (res.code==='00000') {
+          console.log("allTriple res:",res.result)
+          res.result.forEach(item=>{
+            let list={
+              id:item[0],
+              relation:item[2],
+              startEntity:item[1],
+              endEntity:item[3],
+            }
+            tripleList.value.push(list);
+          })
+        }
+      })
+      console.log("tripleList",tripleList);
+    }
+
+    function getAllRelation(){
+      let config={
+        params:{
+          graphId:graphId,
+        }
+      }
+      allRelation(config).then(res=>{
+        console.log("res",res.result);
+        if (res.code==='00000') {
+          relationList.value=[];
+          relationList.value=res.result;
+        }
+        console.log("relationList",relationList.value);
+      })
+    }
+
+    onMounted(()=>{
+      getAllEntity();
+      getAllTriple();
+      getAllRelation();
+    })
+
+    const dataForm = reactive({
+      id:'',
+      relation: '',
+      startEntity: '',
+      endEntity: '',
+    })
+
+    const isEdit=ref(false);
+    const dialogFormVisible = ref(false);
+
+    const openAddDialog = () => {
+      isEdit.value = false; // 设置为添加模式
+      dataForm.value = { id:'', relation: '', startEntity: '', endEntity:'' }; // 重置表单
+      dialogFormVisible.value = true; // 显示对话框
+      console.log("isEdit",isEdit.value);
+      console.log(dataForm.value);
+    };
+
+    const handleConfirm=()=>{
+      if (isEdit.value){
+        // editRelation();
+      }else{
+        addRelation();
+      }
+    }
+
+    // 处理新添加的关系
+    const addRelation = () => {
+      console.log(("enter addRelation"));
+      console.log('dataForm',dataForm);
+      let config={
+        params:{
+          relation:dataForm.relation,
+          startEntityId:dataForm.startEntity,
+          endEntityId:dataForm.endEntity,
+          graphId:graphId,
+        }
+      }
+      addRelationEntity(config).then(res=>{
+        if (res.code==='00000') {
+          ElMessage({
+            message: '添加成功',
+            type: 'success', // 可以是 'success', 'warning', 'info', 'error'
+          });
+          getAllTriple();
+        }else{
+          ElMessage({
+            message:res.result,
+            type: 'error',
+          })
+        }
+        dialogFormVisible.value = false
+      })
+    };
 
     // 编辑操作
     const editItem = (row) => {
-      console.log('编辑:', row);
+      console.log('row', row);
+      console.log(row.startEntity);
+      console.log(row.endEntity);
+      dataForm.id = row.id;
+      entityList.value.forEach(item => {
+        if (item.type === row.endEntity) {
+          dataForm.endEntity=item.id;
+        }
+        if (item.type === row.startEntity) {
+          dataForm.startEntity=item.id;
+        }
+      })
+      dataForm.relation=row.relation;
+      dialogFormVisible.value = true; // 显示对话框
+      isEdit.value=true;
+      console.log("dataForm",dataForm);
     };
+
+    const editRelation=()=>{
+      console.log(("enter editRelation"));
+    }
 
     // 删除操作
     const deleteItem = (row) => {
       console.log('删除:', row);
+      ElMessageBox.confirm(
+          '是否删除该三元组？',
+          {
+            confirmButtonText: '确认删除',
+            cancelButtonText: '取消',
+          }
+      ).then(() => {
+        let config={
+          params:{
+            id:row.id,
+          }
+        }
+        deleteTriple(config).then(res=>{
+          if (res.code==='00000'){
+            ElMessage({
+              type: 'success',
+              message: '三元组已删除',
+            })
+            getAllTriple();
+          }
+        })
+      }).catch(() => {})
     };
 
     const currentPage = ref(1)
@@ -152,33 +311,23 @@ export default {
       console.log(`current page: ${page}`)
     }
 
-    // 创建对话框
-    const dialogFormVisible = ref(false);
-
-    const createForm = reactive({
-      relation: '',
-      startEntity: '',
-      endEntity: '',
-    })
-
-    // 处理新添加的关系
-    const addRelation = () => {
-      dialogFormVisible.value = false
-      console.log('添加关系');
-      console.log('createForm',createForm);
-    };
-
     return{
       title,
       buildMethod,
-      selectedEndType,
-      selectedStartType,
-      selectedRelationName,
-      startEntityType_options,
-      endEntityType_options,
-      relationNames_options,
-      tableData,
+      graphId,
+
+      entityList,
+      relationList,
+      tripleList,
+
+      isEdit,
+      dialogFormVisible,
+      dataForm,
+      handleConfirm,
+      addRelation,
+      openAddDialog,
       editItem,
+      editRelation,
       deleteItem,
 
       currentPage,
@@ -187,9 +336,7 @@ export default {
       handleCurrentChange,
       handleSizeChange,
 
-      dialogFormVisible,
-      createForm,
-      addRelation,
+
     }
   }
 }
@@ -258,5 +405,10 @@ el-select {
   margin-bottom: 10px;
   float: right;
   display: flex;
+}
+
+.noWrapOverflowX{
+  overflow-x: auto;
+  white-space: nowrap;
 }
 </style>

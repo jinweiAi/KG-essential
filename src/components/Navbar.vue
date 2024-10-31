@@ -54,6 +54,12 @@
         </template>
       </el-menu-item>
 
+      <!-- 没有子菜单的菜单项 -->
+<!--      <el-menu-item index="Temp">-->
+<!--        <el-icon><Grid /></el-icon>-->
+<!--        <span>temp</span>-->
+<!--      </el-menu-item>-->
+
       <div class="out_container">
         <el-button type="text" class="out_button" size="large" @click="out2GraphListPage">退出当前图谱</el-button>
       </div>
@@ -106,21 +112,13 @@
 import {onMounted, ref} from 'vue';
 import { useRouter, useRoute } from 'vue-router'
 import { Suitcase,Histogram,DataLine,Grid,More } from '@element-plus/icons-vue';
-import {reactive, shallowRef} from "@vue/runtime-core";
 const router = useRouter()
 const route = useRoute()
 const activeIndex = ref('EntityDesign') // 默认选中的菜单项
-const title = localStorage.getItem('ProjectName')
-const buildMethod = localStorage.getItem('ProjectBuild');
+const title = sessionStorage.getItem('ProjectName')
+const buildMethod = sessionStorage.getItem('ProjectBuild');
 
 console.log("buildMethod",buildMethod)
-
-// defineProps({
-//   title: {
-//     type: String,
-//     required: true
-//   }
-// });
 
 onMounted(()=>{
   activeIndex.value = route.name || 'EntityDesign'; // 使用当前的路由名称或默认值

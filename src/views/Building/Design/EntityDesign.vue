@@ -4,7 +4,7 @@
     <div class="design"><strong>{{buildMethod}}</strong>/实体设计</div>
     <el-card style="background-color: rgba(169,169,169,0.1)">
       <el-row>
-        <el-col :span="11" style="margin-right: 20px;">
+        <el-col :span="11" style="margin-right: 20px;" class="noWrapOverflowX">
           <el-row>
             <el-col :span="12">
               <span class="title">实体类型列表</span>
@@ -16,9 +16,9 @@
 
           <!-- 表格 -->
           <el-row>
-            <el-table :data="tableData1" stripe class="table-box">
-              <el-table-column prop="entityClass" label="实体类型" min-width="120" align="center" show-overflow-tooltip></el-table-column>
-              <el-table-column prop="Disambiguation" label="消歧标识" min-width="100" align="center" show-overflow-tooltip></el-table-column>
+            <el-table :data="entityList" stripe class="table-box">
+              <el-table-column prop="type" label="实体类型" min-width="120" align="center" show-overflow-tooltip></el-table-column>
+              <el-table-column prop="id" label="消歧标识" min-width="100" align="center" show-overflow-tooltip></el-table-column>
               <el-table-column prop="color" label="颜色" min-width="120" align="center" show-overflow-tooltip>
                 <template #default="scope">
                   <div :style="{ backgroundColor: scope.row.color, width: '80px', height: '20px' }"></div>
@@ -30,7 +30,7 @@
                 <template #default="scope">
                   <el-link type="primary" class="operation" @click="editEntity(scope.row)">编辑</el-link>
                   <span style="margin: 0 8px;"></span>
-                  <el-link type="danger" class="operation" @click="deleteFile(scope.row)">删除</el-link>
+                  <el-link type="danger" class="operation" @click="deleteEntity(scope.row)">删除</el-link>
                 </template>
               </el-table-column>
             </el-table>
@@ -42,14 +42,14 @@
                 :page-sizes="[10, 20, 50, 100]"
                 :size="size"
                 layout="total, sizes, prev, pager, next, jumper"
-                :total="tableData1.length"
+                :total="entityList.length"
                 @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
             />
           </div>
         </el-col>
 
-        <el-col :span="12">
+        <el-col :span="12" class="noWrapOverflowX">
           <el-row>
             <el-col :span="12">
               <span class="title">属性列表</span>
@@ -71,7 +71,7 @@
                 <template #default="scope">
                   <el-link type="primary" class="operation" @click="editAttribute(scope.row)">编辑</el-link>
                   <span style="margin: 0 8px;"></span>
-                  <el-link type="danger" class="operation" @click="deleteFile(scope.row)">删除</el-link>
+                  <el-link type="danger" class="operation" @click="deleteAttribute(scope.row)">删除</el-link>
                 </template>
               </el-table-column>
             </el-table>
@@ -100,11 +100,11 @@
     </template>
     <el-form :model="editEntityForm" style="padding: 20px">
       <el-form-item label="实体类型">
-        <el-input v-model="editEntityForm.entityClass" style="width: 50%"/>
+        <el-input v-model="editEntityForm.type" style="width: 50%"/>
       </el-form-item>
-      <el-form-item label="消歧标识">
-        <el-input v-model="editEntityForm.Disambiguation" style="width: 50%"/>
-      </el-form-item>
+<!--      <el-form-item label="消歧标识">-->
+<!--        <el-input v-model="editEntityForm.id" style="width: 50%"/>-->
+<!--      </el-form-item>-->
       <el-form-item label="颜色">
         <el-color-picker v-model="editEntityForm.color" style="width: 50%"/>
       </el-form-item>
@@ -142,8 +142,9 @@
 
 <script>
 import Navbar from "@/components/Navbar.vue";
-import { ref } from 'vue';
-import { useRouter, useRoute } from 'vue-router'
+import {onMounted, ref} from 'vue';
+import {allEntity, createEntity, updateEntity} from "@/api/index.js";
+import {ElMessage} from "element-plus";
 
 export default {
   name: "EntityDesign",
@@ -151,27 +152,47 @@ export default {
     Navbar
   },
   setup() {
-    const router = useRouter()
-    const route = useRoute()
-    const title = localStorage.getItem('ProjectName')
-    const buildMethod = (localStorage.getItem('ProjectBuild')==="custom")?"自定义构建":"模版构建";
+    const title = sessionStorage.getItem('ProjectName')
+    const buildMethod = (sessionStorage.getItem('ProjectBuild')==="custom")?"自定义构建":"模版构建";
+    const graphId = sessionStorage.getItem('ProjectId');
+
+    const entityList=ref([]);
+    // const entityList = ref([
+    //   { entityClass: '原材料', Disambiguation: 'AA', color: '#FFFF00' }, // 黄色
+    //   { entityClass: '产品', Disambiguation: 'AB', color: '#00FF00' }, // 绿色
+    //   { entityClass: '班次', Disambiguation: 'AC', color: '#FF0000' }, // 红色
+    //   { entityClass: '员工', Disambiguation: 'AD', color: '#0000FF' }, // 蓝色
+    //   { entityClass: '设备', Disambiguation: 'AE', color: '#000000' }, // 黑色
+    //   { entityClass: '生产线', Disambiguation: 'AF', color: '#FFFFFF' }, // 白色
+    //   { entityClass: '爆破计划', Disambiguation: 'AG', color: '#800080' }, // 紫色
+    //   { entityClass: '加工计划', Disambiguation: 'AH', color: '#A52A2A' } // 棕色
+    // ]);
+
+    function getAllEntity(){
+      let config={
+        params:{
+          graphId:graphId,
+        }
+      }
+      allEntity(config).then(res=>{
+        if (res.code==='00000') {
+          entityList.value=res.result;
+        }
+      })
+      console.log("entityList",entityList.value)
+    }
+
+    onMounted(()=>{
+      getAllEntity();
+    })
+
 
     const entityDialogVisible = ref(false);
     const attributeDialogVisible = ref(false);
     const isEditEntity = ref(false); // 用于判断实体类型对话框
     const isEditAttribute = ref(false); // 用于判断属性对话框
-    const editEntityForm = ref({ entityClass: '', Disambiguation: '', color: '' });
+    const editEntityForm = ref({ type: '', color: '',id:''});
     const editAttributeForm = ref({ name: '', dataclass: '', union: '' });
-    const tableData1 = ref([
-      { entityClass: '原材料', Disambiguation: 'AA', color: '#FFFF00' }, // 黄色
-      { entityClass: '产品', Disambiguation: 'AB', color: '#00FF00' }, // 绿色
-      { entityClass: '班次', Disambiguation: 'AC', color: '#FF0000' }, // 红色
-      { entityClass: '员工', Disambiguation: 'AD', color: '#0000FF' }, // 蓝色
-      { entityClass: '设备', Disambiguation: 'AE', color: '#000000' }, // 黑色
-      { entityClass: '生产线', Disambiguation: 'AF', color: '#FFFFFF' }, // 白色
-      { entityClass: '爆破计划', Disambiguation: 'AG', color: '#800080' }, // 紫色
-      { entityClass: '加工计划', Disambiguation: 'AH', color: '#A52A2A' } // 棕色
-    ]);
 
 
     const tableData2 = ref([
@@ -184,7 +205,7 @@ export default {
     // 打开添加实体对话框
     const openAddEntityDialog = () => {
       isEditEntity.value = false; // 设置为添加模式
-      editEntityForm.value = { entityClass: '', Disambiguation: '', color: '' }; // 重置表单
+      editEntityForm.value = { type: '', color: '', id:'' }; // 重置表单
       entityDialogVisible.value = true; // 显示对话框
     };
 
@@ -196,16 +217,56 @@ export default {
     };
 
     const saveEntityEdit = () => {
-      const index = tableData1.value.findIndex(item => item.entityClass === editEntityForm.value.entityClass);
-      if (index !== -1) {
-        tableData1.value[index] = editEntityForm.value; // 更新原数据
+      // console.log("editEntityForm", editEntityForm.value);
+      let config={
+        params:{
+          id:editEntityForm.value.id,
+          name:editEntityForm.value.type,
+          color:editEntityForm.value.color,
+        }
       }
-      entityDialogVisible.value = false; // 关闭对话框
+      updateEntity(config).then(res=>{
+        if (res.code==='00000') {
+          ElMessage({
+            message: '更新成功',
+            type: 'success', // 可以是 'success', 'warning', 'info', 'error'
+          })
+          entityDialogVisible.value = false; // 关闭对话框
+          getAllEntity();
+        }else{
+          ElMessage({
+            message: res.result,
+            type: 'warning', // 可以是 'success', 'warning', 'info', 'error'
+          })
+        }
+      })
     };
 
     const addEntity = () => {
-      tableData1.value.push({ ...editEntityForm.value }); // 添加新实体
-      entityDialogVisible.value = false; // 关闭对话框
+      // console.log("editEntityForm",editEntityForm.value);
+      let config={
+        params:{
+          name:editEntityForm.value.type,
+          color:editEntityForm.value.color,
+          graphId:graphId,
+        }
+      }
+      createEntity(config).then(res=>{
+        if (res.code==='00000') {
+          ElMessage({
+            message: '创建成功',
+            type: 'success', // 可以是 'success', 'warning', 'info', 'error'
+          })
+          entityDialogVisible.value = false; // 关闭对话框
+          getAllEntity();
+        }else {
+          ElMessage({
+            message:res.result,
+            type: 'warning',
+          })
+        }
+      })
+
     };
 
     // 打开添加属性对话框
@@ -251,13 +312,16 @@ export default {
     return {
       title,
       buildMethod,
+      graphId,
+
+      entityList,
+
       entityDialogVisible,
       attributeDialogVisible,
       isEditEntity,
       isEditAttribute,
       editEntityForm,
       editAttributeForm,
-      tableData1,
       tableData2,
       openAddEntityDialog,
       editEntity,
@@ -317,5 +381,10 @@ export default {
 .button-box {
   display: flex;
   float: right;
+}
+
+.noWrapOverflowX{
+  overflow-x: auto;
+  white-space: nowrap;
 }
 </style>

@@ -17,41 +17,63 @@
       </el-row>
 
       <!-- 表格 -->
-      <el-table
-          :data="searchedTask"
-          stripe
-          class="table-box"
-      >
-        <el-table-column prop="id" label="序号" width="60"></el-table-column>
-        <el-table-column prop="name" label="任务名称" width="100"></el-table-column>
-        <el-table-column prop="type" label="文件类型" width="120"></el-table-column>
-        <el-table-column prop="sourceName" label="数据来源" width="150" show-overflow-tooltip></el-table-column>
-        <el-table-column prop="description" label="任务描述" min-width="120" show-overflow-tooltip></el-table-column>
-        <el-table-column prop="status" label="状态" width="80"></el-table-column>
-        <el-table-column prop="uploadTime" label="更新时间" width="200"></el-table-column>
+      <el-col class="noWrapOverflowX">
+        <el-table
+            :data="searchedTask"
+            stripe
+            class="table-box"
+        >
+          <el-table-column prop="id" label="序号" width="60"></el-table-column>
+          <el-table-column prop="name" label="任务名称" width="100"></el-table-column>
+          <el-table-column prop="type" label="文件类型" width="120"></el-table-column>
+          <el-table-column prop="sourceName" label="数据来源" width="120" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="description" label="任务描述" min-width="150" show-overflow-tooltip></el-table-column>
+          <el-table-column
+              prop="status"
+              label="状态"
+              min-width="100"
+              :filters="[
+              { text: '已抽取', value: '已抽取' },
+              { text: '未抽取', value: '未抽取' },
+              { text: '抽取失败', value: '抽取失败' },
+              { text: '抽取中', value: '抽取中' },
+            ]"
+              :filter-method="filterTag"
+              filter-placement="bottom-end"
+          >
+            <template #default="scope">
+              <el-tag
+                  :type="scope.row.status === '未抽取' ? 'warning' : scope.row.status === '已抽取' ? 'success' : scope.row.status === '抽取中' ? 'info' : 'danger'"
+                  disable-transitions
+              >{{ scope.row.status }}</el-tag
+              >
+            </template>
+          </el-table-column>
+          <el-table-column prop="updateTime" label="更新时间" width="200"></el-table-column>
 
-        <!-- 操作列 -->
-        <el-table-column fixed="right" label="操作" width="150">
-          <template #default="scope" >
-            <el-link type="primary" class="operation" @click="editTask(scope.row)">编辑</el-link>
-            <el-link type="success" class="operation" @click="doTask(scope.row)">抽取</el-link>
-            <el-link type="danger" class="operation" @click="deleteTask(scope.row)">删除</el-link>
-          </template>
-        </el-table-column>
-      </el-table>
+          <!-- 操作列 -->
+          <el-table-column fixed="right" label="操作" width="150">
+            <template #default="scope" >
+              <el-link type="primary" class="operation" @click="editTask(scope.row)">编辑</el-link>
+              <el-link type="success" class="operation" @click="doTask(scope.row)" :disabled="scope.row.status==='已抽取'">抽取</el-link>
+              <el-link type="danger" @click="deleteTask(scope.row)">删除</el-link>
+            </template>
+          </el-table-column>
+        </el-table>
 
-      <div class="demo-pagination-block">
-        <el-pagination
-            v-model:current-page="currentPage"
-            v-model:page-size="pageSize"
-            :page-sizes="[10, 20, 50, 100]"
-            :size="size"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total=searchedTask.length
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-        />
-      </div>
+        <div class="demo-pagination-block">
+          <el-pagination
+              v-model:current-page="currentPage"
+              v-model:page-size="pageSize"
+              :page-sizes="[10, 20, 50, 100]"
+              :size="size"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total=searchedTask.length
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+          />
+        </div>
+      </el-col>
     </el-card>
 
     <!--创建任务对话框-->
@@ -65,13 +87,13 @@
         </el-form-item>
         <el-form-item label="文件来源" prop="file">
           <el-select v-model="createForm.file" placeholder="选择文件" style="width: 50%">
-            <template #header>
-              <el-input v-model="searchFile" placeholder="请输入文件名称">
-                <template #prepend>
-                  <el-button @click="handleFileSearch" icon="Search"></el-button>
-                </template>
-              </el-input>
-            </template>
+<!--            <template #header>-->
+<!--              <el-input v-model="searchFile" placeholder="请输入文件名称">-->
+<!--                <template #prepend>-->
+<!--                  <el-button @click="handleFileSearch" icon="Search"></el-button>-->
+<!--                </template>-->
+<!--              </el-input>-->
+<!--            </template>-->
             <el-option
                 v-for="item in fileList"
                 :key="item.id"
@@ -134,7 +156,7 @@
 <script>
 import Navbar from "@/components/Navbar.vue";
 import {computed, onMounted, ref} from 'vue';
-import {createNewTask, deleteTaskById, getAllFile, getAllTask, getFileInfo, updateTask} from "@/api/index.js";
+import {createNewTask, deleteTaskById, getAllFile, getAllTask, handleTask, updateTask} from "@/api/index.js";
 import {reactive} from "@vue/runtime-core";
 import {ElMessage, ElMessageBox} from "element-plus";
 
@@ -144,9 +166,9 @@ export default {
     Navbar
   },
   setup(){
-    const title = localStorage.getItem('ProjectName');
-    const buildMethod = (localStorage.getItem('ProjectBuild')==="custom")?"自定义构建":"模版构建";
-    const graphId = localStorage.getItem('ProjectId');
+    const title = sessionStorage.getItem('ProjectName');
+    const buildMethod = (sessionStorage.getItem('ProjectBuild')==="custom")?"自定义构建":"模版构建";
+    const graphId = sessionStorage.getItem('ProjectId');
 
     //对应的文件列表
     const fileList=ref([]);
@@ -183,7 +205,7 @@ export default {
           fileId:createForm.file,
           description:createForm.description,
           graphId:graphId
-        }
+        },
       }
       createNewTask(config).then(res=>{
         if (res.code==='00000'){
@@ -204,7 +226,6 @@ export default {
         createForm.description='';
       })
     }
-
 
     // 搜索框的数据
     const searchQuery = ref('');
@@ -229,63 +250,15 @@ export default {
     const originTask = ref([]);
     const searchedTask = ref([]);
 
-    function getTaskList(){
+    async function getFile(){
       let config={
         params:{
           graphID:graphId
         }
       }
-      getAllTask(config).then(res=>{
-        originTask.value=[];
+      return getAllFile(config).then(res=>{
         if (res.code==='00000') {
-          console.log(res.result);
-          res.result.forEach(item => {
-            let config={
-              params:{
-                fileId:item.source
-              }
-            }
-            getFileInfo(config).then(res=>{
-              if(res.code==='00000'){
-                let taskStatus;
-                if (item.status==='waiting'){
-                  taskStatus='未抽取';
-                }else if(item.status==='success'){
-                  taskStatus='已抽取';
-                }else if(item.status==='error'){
-                  taskStatus='抽取失败';
-                }else{
-                  taskStatus='抽取中';
-                }
-                let list = {
-                  id: item.id,
-                  name: item.name,
-                  type: item.type,
-                  sourceId:item.source,
-                  sourceName: res.result.name,
-                  description: item.description,
-                  status: taskStatus,
-                  uploadTime: item.updateTime,
-                }
-                originTask.value.push(list);
-              }
-            })
-          })
-          console.log("originTask", originTask.value);
-          searchedTask.value=originTask.value;
-        }
-      })
-    }
-
-    function getFile(){
-      let config={
-        params:{
-          graphID:graphId
-        }
-      }
-      getAllFile(config).then(res=>{
-        if (res.code==='00000') {
-          console.log(res.result);
+          // console.log(res.result);
           res.result.forEach(item => {
             let list = {
               id: item.id,
@@ -298,10 +271,55 @@ export default {
       })
     }
 
-    onMounted(()=>{
-      getTaskList();
-      getFile();
-    })
+    function getTaskList(){
+      let config={
+        params:{
+          graphID:graphId
+        }
+      }
+      getAllTask(config).then(res=>{
+        originTask.value=[];
+        if (res.code==='00000') {
+          // console.log(res.result);
+          res.result.forEach(item => {
+            let taskStatus;
+            if (item.status==='waiting'){
+              taskStatus='未抽取';
+            }else if(item.status==='success'){
+              taskStatus='已抽取';
+            }else if(item.status==='error'){
+              taskStatus='抽取失败';
+            }else{
+              taskStatus='抽取中';
+            }
+            let fileName;
+            for(let i=0;i<fileList.value.length;i++) {
+              if (fileList.value[i].id===item.source) {
+                fileName=fileList.value[i].name;
+              }
+            }
+            let list = {
+              id: item.id,
+              name: item.name,
+              type: item.type,
+              sourceId:item.source,
+              sourceName: fileName,
+              description: item.description,
+              status: taskStatus,
+              updateTime: item.updateTime,
+            }
+            originTask.value.push(list);
+          })
+          console.log("originTask", originTask.value);
+          searchedTask.value=originTask.value;
+        }
+      })
+    }
+
+    onMounted(async () => {
+      await getFile();
+      getTaskList();   // getFile 完成后再执行 getTaskList
+    });
 
     
     // 操作处理函数
@@ -362,6 +380,20 @@ export default {
     //TODO:抽取核心功能实现
     const doTask = (row) => {
       console.log('抽取: ', row);
+      let config={
+        params:{
+          taskId:row.id,
+        }
+      }
+      handleTask(config).then(res=>{
+        if (res.code==='00000') {
+          ElMessage({
+            type: 'success',
+            message:'任务完成'
+          })
+          getTaskList();
+        }
+      })
     };
 
     const deleteTask = (row) => {
@@ -406,6 +438,10 @@ export default {
       console.log(`current page: ${page}`)
     }
 
+    const filterTag = (value, row) => {
+      return row.category === value;
+    }
+
     return{
       title,
       buildMethod,
@@ -440,6 +476,8 @@ export default {
       currentPage,
       size,
       pageSize,
+
+      filterTag,
     }
   },
 }
@@ -489,6 +527,11 @@ export default {
   margin-bottom: 10px;
   float: right;
   display: flex;
+}
+
+.noWrapOverflowX{
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
 </style>

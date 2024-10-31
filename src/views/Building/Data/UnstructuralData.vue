@@ -73,8 +73,8 @@
     name:"UnstructuralData",
     components: {Navbar},
     setup(){
-      const title = localStorage.getItem('ProjectName');
-      const buildMethod = (localStorage.getItem('ProjectBuild')==="custom")?"自定义构建":"模版构建";
+      const title = sessionStorage.getItem('ProjectName');
+      const buildMethod = (sessionStorage.getItem('ProjectBuild')==="custom")?"自定义构建":"模版构建";
 
       return {
         title,

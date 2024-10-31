@@ -120,7 +120,7 @@ import {computed, onMounted, ref} from 'vue';
 import { reactive } from "@vue/runtime-core";
 import { useRouter, useRoute } from 'vue-router';
 import {Edit, Delete, Search} from '@element-plus/icons-vue';
-import {allGraphList,createGraph,updateGraph,deleteGraph} from "@/api/index.js";
+import {allGraphList, createGraph, updateGraph, deleteGraph, entityRelationCount} from "@/api/index.js";
 import { ElMessage, ElMessageBox } from 'element-plus';
 
 export default {
@@ -131,8 +131,7 @@ export default {
     Delete
   },
   setup() {
-    const router = useRouter()
-    const route = useRoute()
+    const router = useRouter();
     // 搜索框的数据
     const searchQuery = ref('');
     // 创建对话框
@@ -177,13 +176,23 @@ export default {
       console.log("graphData",graphData.value);
     }
 
+    const entityRelationNumberList = ref({});
+
+    const entityRelationNumber= async () =>{
+      return entityRelationCount().then(res => {
+        entityRelationNumberList.value = res.result;
+        // console.log("entityRelationNumberList after fetch:", entityRelationNumberList.value); // 确认数据已赋值
+      });
+    }
+
     //获取数据库中所有图谱
-    function allGraph(){
+    const allGraph=()=>{
+      // console.log("Starting allGraph, entityRelationNumberList:", entityRelationNumberList.value); // 检查是否已加载
       allGraphList().then(res=>{
         allGraphData.value=[];
         if (res.code==='00000'){
           res.result.forEach(item=>{
-            var build='模版构建'
+            let build='模版构建'
             if (item.build==='custom'){
               build='自定义构建'
             }
@@ -191,8 +200,8 @@ export default {
               id:item.id,
               name:item.name,
               mode:build,
-              entityCount:0,//TODO:后端处理
-              relationCount:0,//TODO:后端处理
+              entityCount:entityRelationNumberList.value[item.id].entityCount,
+              relationCount:entityRelationNumberList.value[item.id].relationCount,
               description:item.description,
             }
             allGraphData.value.push(list);
@@ -203,7 +212,10 @@ export default {
       })
     }
 
-    onMounted(()=>{
+    onMounted(async ()=>{
+      console.log("Start entityRelationNumber");
+      await entityRelationNumber();
+      console.log("Finished entityRelationNumber, now start allGraph");
       allGraph();
     })
 
@@ -242,6 +254,7 @@ export default {
             message: '创建成功',
             type: 'success', // 可以是 'success', 'warning', 'info', 'error'
           });
+          allGraph();
         }else {
           ElMessage({
             message:'创建失败',
@@ -250,7 +263,6 @@ export default {
         }
       })
       createDialogVisible.value = false;
-      allGraph();
       createForm.name='';
       createForm.buildMethod='';
       createForm.description='';
@@ -350,9 +362,9 @@ export default {
           name:graph.name,
         }
       });
-      localStorage.setItem('ProjectName', graph.name)
-      localStorage.setItem('ProjectId', graph.id)
-      localStorage.setItem('ProjectBuild', graph.mode)
+      sessionStorage.setItem('ProjectName', graph.name)
+      sessionStorage.setItem('ProjectId', graph.id)
+      sessionStorage.setItem('ProjectBuild', graph.mode)
       console.log(`进入图谱: ${name}`);
     };
 
@@ -360,6 +372,9 @@ export default {
       searchQuery,
       allGraphData,
       graphData,
+      entityRelationNumber,
+      allGraph,
+      entityRelationNumberList,
       createDialogVisible,
       editDialogVisible,
       rules,

@@ -10,6 +10,7 @@ import StructuredMapping from '@/views/Building/GraphMapping/StructuredMapping.v
 import UnstructuredMapping from '@/views/Building/GraphMapping/UnstructuredMapping.vue'
 import GraphData from '@/views/Building/GraphData.vue'
 import GraphDetail  from "@/views/Building/GraphDetail.vue"
+import Temp from "@/views/Building/Temp.vue";
 
 
 const routes = [
@@ -57,6 +58,11 @@ const routes = [
         path: '/GraphDetail',
         name: 'GraphDetail',
         component:GraphDetail
+    },
+    {
+        path: '/Temp',
+        name: 'Temp',
+        component:Temp
     },
     // ...其他路由配置
     // {

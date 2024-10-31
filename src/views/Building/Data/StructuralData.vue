@@ -21,43 +21,63 @@
       </el-row>
 
       <!-- 表格 -->
-      <el-table
-          v-model:selection="multipleSelection"
-          :data="searchedList"
-          @selection-change="handleSelectionChange"
-          stripe
-          class="table-box"
-      >
-        <el-table-column type="selection" width="40"></el-table-column>
-        <el-table-column prop="id" label="序号" width="60"></el-table-column>
-        <el-table-column prop="name" label="文件名称" min-width="200"></el-table-column>
-        <el-table-column prop="type" label="文件类型" width="120"></el-table-column>
-        <el-table-column prop="size" label="文件大小" width="80"></el-table-column>
-        <el-table-column prop="uploadTime" label="更新时间" width="220"></el-table-column>
+      <el-col class="noWrapOverflowX">
+        <el-table
+            v-model:selection="multipleSelection"
+            :data="searchedList"
+            @selection-change="handleSelectionChange"
+            stripe
+            class="table-box"
+        >
+          <el-table-column type="selection" width="40"></el-table-column>
+          <el-table-column prop="id" label="序号" width="70"></el-table-column>
+          <el-table-column prop="name" label="文件名称" min-width="150"></el-table-column>
+          <el-table-column
+              prop="category"
+              label="文件分类"
+              min-width="120"
+              :filters="[
+                { text: '实体与实例', value: 'entity' },
+                { text: '实体与关系', value: 'relation' },
+              ]"
+              :filter-method="filterTag"
+              filter-placement="bottom-end"
+          >
+            <template #default="scope">
+              <el-tag
+                  :type="scope.row.category === 'entity' ? 'warning' : 'success'"
+                  disable-transitions
+              >{{ scope.row.category }}</el-tag
+              >
+            </template>
+          </el-table-column>
+          <el-table-column prop="type" label="文件类型" min-width="100"></el-table-column>
+          <el-table-column prop="size" label="文件大小" min-width="100"></el-table-column>
+          <el-table-column prop="uploadTime" label="更新时间" min-width="180"></el-table-column>
 
-        <!-- 操作列 -->
-        <el-table-column fixed="right" label="操作" width="150">
-          <template #default="scope" >
-            <el-link type="primary" class="operation" @click="previewFile(scope.row)">预览</el-link>
-            <el-link type="success" class="operation" @click="downloadFile(scope.row)">下载</el-link>
-            <el-link type="danger" class="operation" @click="deleteOne(scope.row)">删除</el-link>
-          </template>
-        </el-table-column>
-      </el-table>
+          <!-- 操作列 -->
+          <el-table-column fixed="right" label="操作" width="150">
+            <template #default="scope" >
+              <el-link type="primary" class="operation" @click="previewFile(scope.row)">预览</el-link>
+              <el-link type="success" class="operation" @click="downloadFile(scope.row)">下载</el-link>
+              <el-link type="danger" class="operation" @click="deleteOne(scope.row)">删除</el-link>
+            </template>
+          </el-table-column>
+        </el-table>
 
-      <div class="demo-pagination-block">
-        <el-pagination
-            v-model:current-page="currentPage"
-            v-model:page-size="pageSize"
-            :page-sizes="[10, 20, 50, 100]"
-            :size="size"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total=searchedList.length
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-        />
-      </div>
-
+        <div class="demo-pagination-block">
+          <el-pagination
+              v-model:current-page="currentPage"
+              v-model:page-size="pageSize"
+              :page-sizes="[10, 20, 50, 100]"
+              :size="size"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total=searchedList.length
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+          />
+        </div>
+      </el-col>
     </el-card>
 
     <el-dialog  v-model="uploadDialogVisible" width="40%" draggable>
@@ -77,7 +97,7 @@
           :file-list="fileList"
           :on-change="changeFile"
           class="upload-demo"
-          action="http://localhost:9090/task/uploadFile"
+          action="http://localhost:9090/file/uploadFile"
           :auto-upload="false"
           accept=".xlsx"
           drag
@@ -97,7 +117,16 @@
 <!--            jpg/png files with a size less than 500kb-->
 <!--          </div>-->
 <!--        </template>-->
+
       </el-upload>
+      <el-select
+          v-model="fileCategory"
+          placeholder="请分类文件"
+          style="width: 50%;margin-top: 5px"
+      >
+        <el-option label="实体类型与实体实例" value="entity" />
+        <el-option label="实体类型关系" value="relation" />
+      </el-select>
       <template #footer>
         <div class="dialog-footer">
           <el-button :disabled="ableToUpload" type="primary" @click="submitUpload">上传文件</el-button>
@@ -138,9 +167,9 @@ export default {
     VueOfficeExcel,
   },
   setup(){
-    const title = localStorage.getItem('ProjectName');
-    const buildMethod = (localStorage.getItem('ProjectBuild')==="custom")?"自定义构建":"模版构建";
-    const graphId = localStorage.getItem('ProjectId');
+    const title = sessionStorage.getItem('ProjectName');
+    const buildMethod = (sessionStorage.getItem('ProjectBuild')==="custom")?"自定义构建":"模版构建";
+    const graphId = sessionStorage.getItem('ProjectId');
 
     console.log(title);
 
@@ -178,6 +207,7 @@ export default {
             let list = {
               id: item.id,
               name: item.name,
+              category: item.category,
               type: item.type,
               size: item.size,
               uploadTime: item.updateTime,
@@ -276,14 +306,23 @@ export default {
       return fileList.value.length===0;
     })
 
+    const fileCategory=ref('');
+
     const submitUpload=()=>{
       console.log("fileList",fileList.value)
       if (fileList.value.length>0){
         const formData = new FormData(); // 创建一个 FormData 对象
         formData.append("file", fileList.value[0].raw); // 将文件添加到 FormData
         formData.append("graphID", graphId); // 添加其他参数
+        formData.append("category", fileCategory.value);
 
-        axios.post("http://localhost:9090/task/uploadFile", formData)
+        axios.post("http://localhost:9090/file/uploadFile", formData,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data'
+              },
+              withCredentials: true // 如果后端需要凭证
+            })
           .then(res => {
             console.log(res);
             if (res.data.code === '00000') {
@@ -446,6 +485,9 @@ export default {
       console.log(`current page: ${page}`)
     }
 
+    const filterTag = (value, row) => {
+      return row.category === value;
+    }
 
     return {
       title,
@@ -461,6 +503,7 @@ export default {
       uploadSuccess,
       removeFile,
       ableToUpload,
+      fileCategory,
       submitUpload,
       previewSrc,
       renderedHandler,
@@ -478,6 +521,7 @@ export default {
       pageSize,
       currentPage,
       size,
+      filterTag,
     }
 
   }
@@ -543,4 +587,8 @@ export default {
   height: 60%;
 }
 
+.noWrapOverflowX{
+  overflow-x: auto;
+  white-space: nowrap;
+}
 </style>

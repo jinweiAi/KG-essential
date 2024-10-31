@@ -9,7 +9,7 @@
 
     <el-card style="background-color: rgba(169,169,169,0.1)">
       <el-row>
-        <el-col :span="11" style="margin-right: 20px;">
+        <el-col :span="11" style="margin-right: 20px;" class="noWrapOverflowX">
           <el-row>
             <el-col :span="12">
               <span class="title">实体列表</span>
@@ -17,7 +17,6 @@
             <el-col :span="12" style="text-align: right;">
               <!-- <el-button type="primary" class="button-box" @click="dialogFormVisible = true">添加实体类型</el-button> -->
               <el-input v-model="input" style="width: 120px" placeholder="请输入实体名称" />
-              <span style="margin: 0 8px;"></span>
             </el-col>
           </el-row>
           <!-- table -->
@@ -28,14 +27,13 @@
                 class="table-box"
                 style="width: 100%;"
             >
-              <el-table-column prop="entityName" label="实体名称" align="center" show-overflow-tooltip></el-table-column>
-              <el-table-column prop="entityClass" label="实体类型" align="center" show-overflow-tooltip></el-table-column>
+              <el-table-column prop="itemName" label="实体实例名称" align="center" show-overflow-tooltip></el-table-column>
+              <el-table-column prop="entityName" label="实体类型" align="center" show-overflow-tooltip></el-table-column>
               <!-- 操作列 -->
               <el-table-column fixed="right" label="操作" align="center" show-overflow-tooltip>
                 <template #default="scope" >
                   <el-link type="primary" class="operation" @click="previewFile(scope.row)">属性</el-link>
-                  <span style="margin: 0 8px;"> </span>
-                  <el-link type="danger" class="operation" @click="deleteFile(scope.row)">删除</el-link>
+                  <el-link type="danger" @click="deleteFile(scope.row)">删除</el-link>
                 </template>
               </el-table-column>
 
@@ -55,16 +53,14 @@
           </div>
         </el-col>
 
-
-        <el-col :span="12">
+        <el-col :span="12" class="noWrapOverflowX">
           <el-row>
             <el-col :span="12">
               <span class="title">关系列表</span>
             </el-col>
-            <el-col :span="12" style="text-align: right;">
+            <el-col :span="12" style="display: flex; justify-content: flex-end; overflow-x: auto; white-space: nowrap;">
               <!-- <el-button type="primary" class="button-box" @click="dialogFormVisible = true">添加实体属性</el-button> -->
-              <el-input v-model="input" style="width: 120px" placeholder="请输入起始实体" />
-              <span style="margin: 0 8px;"></span>
+              <el-input v-model="input" style="width: 120px;margin-right: 10px" placeholder="请输入起始实体" />
               <el-input v-model="input" style="width: 120px" placeholder="请输入目标实体" />
             </el-col>
           </el-row>
@@ -76,13 +72,13 @@
                 class="table-box"
             >
               <el-table-column prop="relationName" label="关系名称" align="center" show-overflow-tooltip></el-table-column>
-              <el-table-column prop="beginEntity" label="起始实体" align="center" show-overflow-tooltip></el-table-column>
-              <el-table-column prop="targetEntity" label="目标实体" align="center" show-overflow-tooltip></el-table-column>
+              <el-table-column prop="headItemName" label="起始实体" align="center" show-overflow-tooltip></el-table-column>
+              <el-table-column prop="tailItemName" label="目标实体" align="center" show-overflow-tooltip></el-table-column>
 
               <!-- 操作列 -->
               <el-table-column fixed="right" label="操作" align="center" show-overflow-tooltip>
                 <template #default="scope" >
-                  <el-link type="danger" class="operation" @click="deleteFile(scope.row)">删除</el-link>
+                  <el-link type="danger" @click="deleteFile(scope.row)">删除</el-link>
                 </template>
               </el-table-column>
 
@@ -103,8 +99,6 @@
         </el-col>
       </el-row>
 
-
-
     </el-card>
   </div>
 </template>
@@ -112,8 +106,8 @@
 <script>
 
 import Navbar from "@/components/Navbar.vue";
-import {computed, onMounted, ref} from 'vue';
-import {reactive} from "@vue/runtime-core";
+import { onMounted, ref} from 'vue';
+import {allEntityItems, allItemRelation} from "@/api/index.js";
 
 export default {
   name: "GraphData",
@@ -122,31 +116,37 @@ export default {
   },
 
   setup(){
-    const title = localStorage.getItem('ProjectName');
-    const buildMethod = (localStorage.getItem('ProjectBuild')==="custom")?"自定义构建":"模版构建";
+    const title = sessionStorage.getItem('ProjectName');
+    const buildMethod = (sessionStorage.getItem('ProjectBuild')==="custom")?"自定义构建":"模版构建";
+    const graphId = sessionStorage.getItem('ProjectId');
 
-    const entityTable=ref(
-        [
-          {entityName:"李四",entityClass:"产品"},
-          {entityName:"王五",entityClass:"产品"},
-          {entityName:"赵六",entityClass:"产品"},
-          {entityName:"张三",entityClass:"产品"},
-          {entityName:"南京",entityClass:"城市"},
-          {entityName:"浦口",entityClass:"城市"},
-          {entityName:"徐州",entityClass:"城市"},
-          {entityName:"北京",entityClass:"城市"},
-        ]
-    )
-    const input = ref('')
+    const entityTable=ref([]);
+    const relationTable=ref([]);
+    const input = ref('');
 
-    const relationTable=ref(
-        [
-          {relationName:"构成",beginEntity:"浦口",targetEntity:"赵刘"},
-          {relationName:"构成",beginEntity:"北京",targetEntity:"王五"},
-          {relationName:"构成",beginEntity:"南京",targetEntity:"李四"},
-          {relationName:"构成",beginEntity:"徐州",targetEntity:"张三"},
-        ]
-    )
+    const getAll=()=>{
+      let config={
+        params:{
+          graphId:graphId,
+        }
+      }
+      allEntityItems(config).then(res=>{
+        if (res.code==='00000') {
+          entityTable.value=res.result;
+        }
+      })
+      allItemRelation(config).then(res=>{
+        if (res.code==='00000') {
+          relationTable.value=res.result;
+        }
+      })
+      console.log("entityTable",entityTable.value);
+      console.log("relationTable",relationTable.value);
+    }
+
+    onMounted(()=>{
+      getAll();
+    })
 
     const currentPage1 = ref(1)
     const pageSize1 = ref(100)
@@ -175,11 +175,16 @@ export default {
     };
 
     return{
-      input,
       title,
       buildMethod,
+      graphId,
+
       entityTable,
       relationTable,
+      getAll,
+
+      input,
+
       previewFile,
       deleteFile,
 
@@ -193,13 +198,9 @@ export default {
     };
   }
 }
-
 </script>
 
-
-
 <style scoped>
-
 .content-container {
   margin-left: 20%; /* 给内容部分留出导航栏的宽度 */
   padding: 20px;
@@ -218,7 +219,6 @@ export default {
   justify-content: space-between; /* 将内容和按钮分布到两边 */
   align-items: center; /* 垂直居中 */
 }
-
 
 .generate-button {
   background-color: #205cb1;
@@ -254,4 +254,14 @@ export default {
   margin-top: 15px;
   max-height: 550px;
 }
+
+.operation {
+  margin-right: 10px;
+}
+
+.noWrapOverflowX{
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
 </style>
