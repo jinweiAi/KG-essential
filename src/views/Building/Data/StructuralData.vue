@@ -134,14 +134,37 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="excelFormVisible" width="80%" draggable>
-<!--      <iframe src=previewSrc width="600" height="400"></iframe>-->
-      <vue-office-excel
-          :src="previewSrc"
-          style="height: 200px"
-          @rendered="renderedHandler"
-          @error="errorHandler"
-      />
+<!--    <el-dialog v-model="excelFormVisible" width="80%" draggable>-->
+<!--&lt;!&ndash;      <iframe src=previewSrc width="600" height="400"></iframe>&ndash;&gt;-->
+<!--      <vue-office-excel-->
+<!--          :src="previewSrc"-->
+<!--          style="height: 200px"-->
+<!--          @rendered="renderedHandler"-->
+<!--          @error="errorHandler"-->
+<!--      />-->
+<!--    </el-dialog>-->
+    <el-dialog v-model="excelFormVisible" max-width="80%" draggable style="max-height: 650px">
+      <template #header>
+        <span style="font-size: 24px;font-weight: bold;">文件预览</span>
+      </template>
+      <el-table
+          :data="excelData.slice(1)"
+          style="width: 90%;overflow-y: auto;justify-self: center"
+          :header-cell-style="{ backgroundColor: '#569eda', color: '#505050' }"
+          :max-height="500"
+      >
+        <!-- 动态生成表头 -->
+        <el-table-column
+            v-for="(header, index) in excelData[0]"
+            :key="index"
+            :label="header"
+            :prop="'col' + index"
+        >
+          <template #default="scope">
+            <span>{{ scope.row[index] }}</span>
+          </template>
+        </el-table-column>
+      </el-table>
     </el-dialog>
 
 
@@ -153,12 +176,13 @@
 <script >
 import Navbar from "@/components/Navbar.vue";
 import {computed, onMounted, ref} from 'vue';
-import {getAllFile, deleteFileById, downloadOne, downloadFiles} from "@/api/index.js"
+import {getAllFile, deleteFileById, downloadOne, downloadFiles, deleteTriple} from "@/api/index.js"
 import axios from 'axios';
-import {ElMessage} from "element-plus";
+import {ElMessage, ElMessageBox} from "element-plus";
 import VueOfficeExcel from '@vue-office/excel'
 import '@vue-office/excel/lib/index.css'
 import qs from 'qs'
+import * as XLSX from 'xlsx';
 
 export default {
   name: "StructuralData",
@@ -233,37 +257,44 @@ export default {
 
     const deleteMulti=()=>{
       console.log("multipleSelection",multipleSelection.value);
-      let idArray=[];
-      for(let i=0;i<multipleSelection.value.length;i++){
-        idArray.push(multipleSelection.value[i].id);
-      }
-      console.log(typeof idArray);
-      console.log("idArray",idArray);
-      let config={
-        params:{
-          idList:idArray,
-        },
-        paramsSerializer: {
-          serialize: params => {
-            return qs.stringify(params, {indices:false})
+      ElMessageBox.confirm(
+          '是否批量删除文件？',
+          {
+            confirmButtonText: '确认删除',
+            cancelButtonText: '取消',
+          }
+      ).then(() => {
+        let idArray=[];
+        for(let i=0;i<multipleSelection.value.length;i++){
+          idArray.push(multipleSelection.value[i].id);
+        }
+        console.log("idArray",idArray);
+        let config={
+          params:{
+            idList:idArray,
+          },
+          paramsSerializer: {
+            serialize: params => {
+              return qs.stringify(params, {indices:false})
+            }
           }
         }
-      }
-      deleteFileById(config).then(res=>{
-        console.log(res);
-        if (res.code === '00000') {
-          ElMessage({
-            message: '删除成功',
-            type: 'success', // 可以是 'success', 'warning', 'info', 'error'
-          })
-          getFileList();
-        }else{
-          ElMessage({
-            message: "id为"+res.data.result+"的文件删除失败！",
-            type: 'error', // 可以是 'success', 'warning', 'info', 'error'
-          });
-        }
-      })
+        deleteFileById(config).then(res=>{
+          console.log(res);
+          if (res.code === '00000') {
+            ElMessage({
+              message: '删除成功',
+              type: 'success', // 可以是 'success', 'warning', 'info', 'error'
+            })
+            getFileList();
+          }else{
+            ElMessage({
+              message: "id为"+res.data.result+"的文件删除失败！",
+              type: 'error', // 可以是 'success', 'warning', 'info', 'error'
+            });
+          }
+        })
+      }).catch(() => {})
     }
 
     //文件上传处理
@@ -362,13 +393,38 @@ export default {
     const errorHandler = (error) => {
       console.error('Error rendering Excel:', error);
     };
+
+
+    const excelData = ref([]);
     // 操作处理函数
     const previewFile = (row) => {
       //TODO:
       console.log('预览文件: ', row);
+      axios.get(`http://localhost:9090/file/fetchFileContent`, {
+        params: { id: row.id },
+        responseType: 'arraybuffer', // 确保返回的是二进制数据
+      }).then(response => {
+        // 将 ArrayBuffer 转换为 Uint8Array
+        const data = new Uint8Array(response.data);
+
+        // 使用 XLSX 解析 Excel 文件内容
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+
+        // 将工作表内容转换为 JSON 格式
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        // 将解析的数据保存到状态中，以便在模板中渲染
+        excelData.value = jsonData;
+        excelFormVisible.value = true; // 打开预览对话框
+      })
+      .catch(error => {
+        console.error('Error loading file:', error);
+      });
       // previewSrc.value = "http://localhost:9090/files/%E6%B5%8B%E8%AF%952.xlsx";
       // window.open("https://view.officeapps.live.com/op/view.aspx?src="+encodeURIComponent(previewSrc))
-      excelFormVisible.value=true;
+      // excelFormVisible.value=true;
 
       // let config={
       //   params:{
@@ -455,26 +511,34 @@ export default {
 
     const deleteOne = (row) => {
       console.log('删除文件: ', row.name);
-      let config={
-        params:{
-          idList:row.id,
+      ElMessageBox.confirm(
+          '是否删除该文件？',
+          {
+            confirmButtonText: '确认删除',
+            cancelButtonText: '取消',
+          }
+      ).then(() => {
+        let config={
+          params:{
+            idList:row.id,
+          }
         }
-      }
-      deleteFileById(config).then(res=>{
-        console.log(res);
-        if (res.code === '00000') {
-          ElMessage({
-            message: '删除成功',
-            type: 'success', // 可以是 'success', 'warning', 'info', 'error'
-          })
-          getFileList();
-        }else{
-          ElMessage({
-            message: "id为"+res.data.result+"的文件删除失败！",
-            type: 'error', // 可以是 'success', 'warning', 'info', 'error'
-          });
-        }
-      })
+        deleteFileById(config).then(res=>{
+          console.log(res);
+          if (res.code === '00000') {
+            ElMessage({
+              message: '删除成功',
+              type: 'success', // 可以是 'success', 'warning', 'info', 'error'
+            })
+            getFileList();
+          }else{
+            ElMessage({
+              message: "id为"+res.data.result+"的文件删除失败！",
+              type: 'error', // 可以是 'success', 'warning', 'info', 'error'
+            });
+          }
+        })
+      }).catch(() => {})
     };
 
     // 处理分页
@@ -509,7 +573,10 @@ export default {
       renderedHandler,
       errorHandler,
       excelFormVisible,
+
+      excelData,
       previewFile,
+
       downloadFile,
       downloadMulti,
       deleteOne,
@@ -582,9 +649,9 @@ export default {
   display: flex;
 }
 
-.preview-box {
-  width: 60%;
-  height: 60%;
+.preview_dialog{
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .noWrapOverflowX{

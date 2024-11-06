@@ -2,7 +2,7 @@
   <Navbar :title="title"/>
   <div class="content-container">
     <div class="design"><strong>{{buildMethod}}</strong>/图谱数据
-      <button class="generate-button">
+      <button class="generate-button" @click="generate">
         生成图谱
       </button>
     </div>
@@ -107,7 +107,8 @@
 
 import Navbar from "@/components/Navbar.vue";
 import { onMounted, ref} from 'vue';
-import {allEntityItems, allItemRelation} from "@/api/index.js";
+import {allEntityItems, allItemRelation, generateGraph} from "@/api/index.js";
+import {ElMessage} from "element-plus";
 
 export default {
   name: "GraphData",
@@ -148,6 +149,22 @@ export default {
       getAll();
     })
 
+    const generate=()=>{
+      let config={
+        params: {
+          graphId:graphId,
+        }
+      }
+      generateGraph(config).then(res=>{
+        if (res.code==='00000') {
+          ElMessage({
+            message: '生成图谱成功，在图谱详情页面查看',
+            type: 'success', // 可以是 'success', 'warning', 'info', 'error'
+          })
+        }
+      })
+    }
+
     const currentPage1 = ref(1)
     const pageSize1 = ref(100)
     const currentPage2 = ref(1)
@@ -187,6 +204,8 @@ export default {
 
       previewFile,
       deleteFile,
+
+      generate,
 
       currentPage1,
       pageSize1,

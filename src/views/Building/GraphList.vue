@@ -213,9 +213,9 @@ export default {
     }
 
     onMounted(async ()=>{
-      console.log("Start entityRelationNumber");
+      // console.log("Start entityRelationNumber");
       await entityRelationNumber();
-      console.log("Finished entityRelationNumber, now start allGraph");
+      // console.log("Finished entityRelationNumber, now start allGraph");
       allGraph();
     })
 

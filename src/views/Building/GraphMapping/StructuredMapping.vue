@@ -25,8 +25,8 @@
         >
           <el-table-column prop="id" label="序号" width="60"></el-table-column>
           <el-table-column prop="name" label="任务名称" width="100"></el-table-column>
-          <el-table-column prop="type" label="文件类型" width="120"></el-table-column>
-          <el-table-column prop="sourceName" label="数据来源" width="120" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="type" label="文件类型" width="100"></el-table-column>
+          <el-table-column prop="sourceName" label="数据来源" min-width="150" show-overflow-tooltip></el-table-column>
           <el-table-column prop="description" label="任务描述" min-width="150" show-overflow-tooltip></el-table-column>
           <el-table-column
               prop="status"
@@ -55,7 +55,7 @@
           <el-table-column fixed="right" label="操作" width="150">
             <template #default="scope" >
               <el-link type="primary" class="operation" @click="editTask(scope.row)">编辑</el-link>
-              <el-link type="success" class="operation" @click="doTask(scope.row)" :disabled="scope.row.status==='已抽取'">抽取</el-link>
+              <el-link type="success" class="operation" @click="doTask(scope.row)" :disabled="scope.row.status!=='未抽取'">抽取</el-link>
               <el-link type="danger" @click="deleteTask(scope.row)">删除</el-link>
             </template>
           </el-table-column>
@@ -288,15 +288,20 @@ export default {
             }else if(item.status==='success'){
               taskStatus='已抽取';
             }else if(item.status==='error'){
-              taskStatus='抽取失败';
+              taskStatus='文件失效';
             }else{
               taskStatus='抽取中';
             }
-            let fileName;
+            let fileName='';
             for(let i=0;i<fileList.value.length;i++) {
               if (fileList.value[i].id===item.source) {
                 fileName=fileList.value[i].name;
+                break;
               }
+            }
+            if (fileName===''){
+              taskStatus='文件失效';
+              fileName='未找到文件';
             }
             let list = {
               id: item.id,

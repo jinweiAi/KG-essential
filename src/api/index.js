@@ -39,3 +39,4 @@ export const deleteTriple = config => request._get('/kg/deleteTriple',config);
 /* GraphData.vue */
 export const allEntityItems = config => request._get('/kg/getAllEntityItem',config);
 export const allItemRelation = config => request._get('/kg/getAllItemRelation',config);
+export const generateGraph = config => request._get('/kg/generateGraph',config);
