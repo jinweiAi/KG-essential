@@ -13,15 +13,6 @@
         <div class="title-inner">{{ title }}</div>
       </header>
       <!-- 带有子列表的菜单项 -->
-      <el-sub-menu index="Design">
-        <template #title>
-          <el-icon><Suitcase /></el-icon>
-          <span><pre>   本体设计</pre></span>
-        </template>
-        <el-menu-item index="EntityDesign"><pre>  实体设计</pre></el-menu-item>
-        <el-menu-item index="RelationDesign"><pre>  关系设计</pre></el-menu-item>
-      </el-sub-menu>
-
       <el-sub-menu index="Data">
         <template #title>
           <el-icon><Histogram /></el-icon>
@@ -29,6 +20,15 @@
         </template>
         <el-menu-item index="StructuralData" :disabled="buildMethod==='自定义构建'"><pre>  结构化数据</pre></el-menu-item>
         <el-menu-item index="UnstructuralData" :disabled="buildMethod==='模版构建'"><pre>  非结构化数据</pre></el-menu-item>
+      </el-sub-menu>
+
+      <el-sub-menu index="Design">
+        <template #title>
+          <el-icon><Suitcase /></el-icon>
+          <span><pre>   本体设计</pre></span>
+        </template>
+        <el-menu-item index="EntityDesign"><pre>  实体设计</pre></el-menu-item>
+        <el-menu-item index="RelationDesign"><pre>  关系设计</pre></el-menu-item>
       </el-sub-menu>
 
       <!-- 另一个带子菜单的项 -->

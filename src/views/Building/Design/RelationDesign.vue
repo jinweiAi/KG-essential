@@ -205,7 +205,10 @@ export default {
 
     const openAddDialog = () => {
       isEdit.value = false; // 设置为添加模式
-      dataForm.value = { id:'', relation: '', startEntity: '', endEntity:'' }; // 重置表单
+      dataForm.id = '';
+      dataForm.relation = '';
+      dataForm.startEntity = '';
+      dataForm.endEntity = '';
       dialogFormVisible.value = true; // 显示对话框
       console.log("isEdit",isEdit.value);
       console.log(dataForm.value);

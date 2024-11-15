@@ -24,7 +24,7 @@
             class="table-box"
         >
           <el-table-column prop="id" label="序号" width="60"></el-table-column>
-          <el-table-column prop="name" label="任务名称" width="100"></el-table-column>
+          <el-table-column prop="name" label="任务名称" width="150"></el-table-column>
           <el-table-column prop="type" label="文件类型" width="100"></el-table-column>
           <el-table-column prop="sourceName" label="数据来源" min-width="150" show-overflow-tooltip></el-table-column>
           <el-table-column prop="description" label="任务描述" min-width="150" show-overflow-tooltip></el-table-column>

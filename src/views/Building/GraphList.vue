@@ -362,9 +362,10 @@ export default {
           name:graph.name,
         }
       });
-      sessionStorage.setItem('ProjectName', graph.name)
-      sessionStorage.setItem('ProjectId', graph.id)
-      sessionStorage.setItem('ProjectBuild', graph.mode)
+      sessionStorage.setItem('ProjectName', graph.name);
+      sessionStorage.setItem('ProjectId', graph.id);
+      sessionStorage.setItem('ProjectBuild', graph.mode);
+      sessionStorage.setItem('GraphGenerate', false);
       console.log(`进入图谱: ${name}`);
     };
 

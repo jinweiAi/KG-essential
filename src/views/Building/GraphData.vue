@@ -25,7 +25,7 @@
                 :data="entityTable"
                 stripe
                 class="table-box"
-                style="width: 100%;"
+                :max-height="500"
             >
               <el-table-column prop="itemName" label="实体实例名称" align="center" show-overflow-tooltip></el-table-column>
               <el-table-column prop="entityName" label="实体类型" align="center" show-overflow-tooltip></el-table-column>
@@ -70,6 +70,7 @@
                 :data="relationTable"
                 stripe
                 class="table-box"
+                :max-height="500"
             >
               <el-table-column prop="relationName" label="关系名称" align="center" show-overflow-tooltip></el-table-column>
               <el-table-column prop="headItemName" label="起始实体" align="center" show-overflow-tooltip></el-table-column>
@@ -161,6 +162,7 @@ export default {
             message: '生成图谱成功，在图谱详情页面查看',
             type: 'success', // 可以是 'success', 'warning', 'info', 'error'
           })
+          sessionStorage.setItem('GraphGenerate', true);
         }
       })
     }
