@@ -16,7 +16,12 @@
 
           <!-- 表格 -->
           <el-row>
-            <el-table :data="entityList" stripe class="table-box">
+            <el-table
+                :data="entityList"
+                class="table-box"
+                @row-click="handleRowClick"
+                :row-class-name="tableRowClassName"
+            >
               <el-table-column prop="type" label="实体类型" min-width="120" align="center" show-overflow-tooltip></el-table-column>
               <el-table-column prop="id" label="消歧标识" min-width="100" align="center" show-overflow-tooltip></el-table-column>
               <el-table-column prop="color" label="颜色" min-width="120" align="center" show-overflow-tooltip>
@@ -24,13 +29,11 @@
                   <div :style="{ backgroundColor: scope.row.color, width: '80px', height: '20px' }"></div>
                 </template>
               </el-table-column>
-
               <!-- 操作列 -->
               <el-table-column fixed="right" label="操作" min-width="120" align="center" show-overflow-tooltip>
                 <template #default="scope">
-                  <el-link type="primary" class="operation" @click="editEntity(scope.row)">编辑</el-link>
-                  <span style="margin: 0 8px;"></span>
-                  <el-link type="danger" class="operation" @click="deleteEntity(scope.row)">删除</el-link>
+                  <el-link type="primary" class="operation" @click.stop="editEntity(scope.row)">编辑</el-link>
+                  <el-link type="danger" @click.stop="cancelEntity(scope.row)">删除</el-link>
                 </template>
               </el-table-column>
             </el-table>
@@ -49,10 +52,11 @@
           </div>
         </el-col>
 
-        <el-col :span="12" class="noWrapOverflowX">
+        <el-col :span="12" class="noWrapOverflowX" v-if="selectEntity.name">
           <el-row>
             <el-col :span="12">
-              <span class="title">属性列表</span>
+              <span class="title">{{ selectEntity.name||''}}</span>
+              <span style="font-size: 20px;"> 属性列表</span>
             </el-col>
             <el-col :span="12" style="text-align: right;">
               <el-button type="primary" class="button-box" @click="openAddAttributeDialog">添加实体属性</el-button>
@@ -61,17 +65,15 @@
 
           <!-- 表格 -->
           <el-row>
-            <el-table :data="tableData2" stripe class="table-box">
+            <el-table :data="selectProperty" stripe class="table-box">
               <el-table-column prop="name" label="属性名称" min-width="120" align="center" show-overflow-tooltip></el-table-column>
-              <el-table-column prop="dataclass" label="数据类型" min-width="100" align="center" show-overflow-tooltip></el-table-column>
-              <el-table-column prop="union" label="单位" min-width="120" align="center" show-overflow-tooltip></el-table-column>
-
+              <el-table-column prop="type" :formatter="formatType" label="数据类型" min-width="100" align="center" show-overflow-tooltip></el-table-column>
+              <el-table-column prop="unit" label="单位" min-width="120" align="center" show-overflow-tooltip></el-table-column>
               <!-- 操作列 -->
               <el-table-column fixed="right" label="操作" min-width="120" align="center" show-overflow-tooltip>
                 <template #default="scope">
                   <el-link type="primary" class="operation" @click="editAttribute(scope.row)">编辑</el-link>
-                  <span style="margin: 0 8px;"></span>
-                  <el-link type="danger" class="operation" @click="deleteAttribute(scope.row)">删除</el-link>
+                  <el-link type="danger" class="operation" @click="cancelAttribute(scope.row)">删除</el-link>
                 </template>
               </el-table-column>
             </el-table>
@@ -83,7 +85,7 @@
                 :page-sizes="[10, 20, 50, 100]"
                 :size="size"
                 layout="total, sizes, prev, pager, next, jumper"
-                :total="tableData2.length"
+                :total="selectProperty.length"
                 @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
             />
@@ -121,15 +123,23 @@
     <template #header>
       <span style="font-size: 24px; font-weight: bold;">{{ isEditAttribute ? '编辑实体属性' : '添加实体属性' }}</span>
     </template>
-    <el-form :model="editAttributeForm" style="padding: 20px">
+    <el-form :model="propertyForm" style="padding: 20px" label-position="right" label-width="100px">
       <el-form-item label="属性名称">
-        <el-input v-model="editAttributeForm.name" style="width: 50%"/>
+        <el-input v-model="propertyForm.name" style="width: 60%"/>
       </el-form-item>
       <el-form-item label="数据类型">
-        <el-input v-model="editAttributeForm.dataclass" style="width: 50%"/>
+        <el-select
+            v-model="propertyForm.type"
+            placeholder="选择数据类型"
+            style="width: 50%"
+        >
+          <el-option label="时间" value="time" />
+          <el-option label="字符串" value="string" />
+          <el-option label="数值" value="value" />
+        </el-select>
       </el-form-item>
       <el-form-item label="单位">
-        <el-input v-model="editAttributeForm.union" style="width: 50%"/>
+        <el-input v-model="propertyForm.unit" style="width: 60%"/>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -143,8 +153,15 @@
 <script>
 import Navbar from "@/components/Navbar.vue";
 import {onMounted, ref} from 'vue';
-import {allEntity, createEntity, updateEntity} from "@/api/index.js";
-import {ElMessage} from "element-plus";
+import {
+  allEntity,
+  createEntity,
+  createProperty,
+  deleteEntity,
+  getProperty,
+  updateEntity, updateProperty
+} from "@/api/index.js";
+import {ElMessage, ElMessageBox} from "element-plus";
 
 export default {
   name: "EntityDesign",
@@ -157,50 +174,58 @@ export default {
     const graphId = sessionStorage.getItem('ProjectId');
 
     const entityList=ref([]);
-    // const entityList = ref([
-    //   { entityClass: '原材料', Disambiguation: 'AA', color: '#FFFF00' }, // 黄色
-    //   { entityClass: '产品', Disambiguation: 'AB', color: '#00FF00' }, // 绿色
-    //   { entityClass: '班次', Disambiguation: 'AC', color: '#FF0000' }, // 红色
-    //   { entityClass: '员工', Disambiguation: 'AD', color: '#0000FF' }, // 蓝色
-    //   { entityClass: '设备', Disambiguation: 'AE', color: '#000000' }, // 黑色
-    //   { entityClass: '生产线', Disambiguation: 'AF', color: '#FFFFFF' }, // 白色
-    //   { entityClass: '爆破计划', Disambiguation: 'AG', color: '#800080' }, // 紫色
-    //   { entityClass: '加工计划', Disambiguation: 'AH', color: '#A52A2A' } // 棕色
-    // ]);
-
-    function getAllEntity(){
-      let config={
-        params:{
-          graphId:graphId,
-        }
-      }
-      allEntity(config).then(res=>{
-        if (res.code==='00000') {
-          entityList.value=res.result;
-        }
-      })
-      console.log("entityList",entityList.value)
-    }
-
-    onMounted(()=>{
-      getAllEntity();
-    })
-
-
     const entityDialogVisible = ref(false);
     const attributeDialogVisible = ref(false);
     const isEditEntity = ref(false); // 用于判断实体类型对话框
     const isEditAttribute = ref(false); // 用于判断属性对话框
     const editEntityForm = ref({ type: '', color: '',id:''});
-    const editAttributeForm = ref({ name: '', dataclass: '', union: '' });
+    const propertyForm = ref({ id: '', name: '', type: '', unit: '' });
+    const propertyList=ref({});
+    const selectEntity = ref({id:'',name:'',}); // 用于动态显示标题的实体类型名称
+    const selectProperty=ref([]);
+    // const tableData2 = ref([
+    //   { name: '时间', dataclass: '日期', union: '' },
+    //   { name: '任务', dataclass: '字符串', union: '' },
+    //   { name: '预估出矿量', dataclass: '数值', union: '' },
+    //   { name: '实际出矿量', dataclass: '数值', union: '' }
+    // ]);
 
+    async function getAllEntity(){
+      let config={
+        params:{
+          graphId:graphId,
+        }
+      }
+      return allEntity(config).then(res=>{
+        if (res.code==='00000') {
+          entityList.value=res.result;
+        }
+      })
+    }
 
-    const tableData2 = ref([
-      { name: '时间', dataclass: '日期', union: '' },
-      { name: '任务', dataclass: '字符串', union: '' },
-      { name: '预估出矿量', dataclass: '数值', union: '' },
-      { name: '实际出矿量', dataclass: '数值', union: '' }
-    ]);
+    async function getAllProperties(){
+      let config={
+        params:{
+          graphId:graphId,
+        }
+      }
+      return getProperty(config).then(res=> {
+        if (res.code === '00000') {
+          propertyList.value = res.result;
+          if (selectEntity.value.id!==''){
+            selectProperty.value=propertyList.value[selectEntity.value.id];
+          }
+          console.log("selectProperty",selectProperty.value);
+        }
+      })
+    }
+
+    onMounted(async ()=>{
+      await getAllEntity();
+      await getAllProperties();
+      console.log("entityList",entityList.value);
+      console.log("propertyList",propertyList.value);
+    })
 
     // 打开添加实体对话框
     const openAddEntityDialog = () => {
@@ -209,6 +234,9 @@ export default {
       entityDialogVisible.value = true; // 显示对话框
     };
 
+    /**** ***** ****/
+    /*** 实体部分 ***/
+    /**** ***** ****/
     // 编辑实体类型
     const editEntity = (row) => {
       isEditEntity.value = true; // 设置为编辑模式
@@ -225,15 +253,16 @@ export default {
           color:editEntityForm.value.color,
         }
       }
-      updateEntity(config).then(res=>{
-        if (res.code==='00000') {
+      updateEntity(config).then(res => {
+        if (res.code === '00000') {
           ElMessage({
             message: '更新成功',
             type: 'success', // 可以是 'success', 'warning', 'info', 'error'
           })
           entityDialogVisible.value = false; // 关闭对话框
           getAllEntity();
-        }else{
+          getAllProperties();
+        } else {
           ElMessage({
             message: res.result,
             type: 'warning', // 可以是 'success', 'warning', 'info', 'error'
@@ -259,6 +288,7 @@ export default {
           })
           entityDialogVisible.value = false; // 关闭对话框
           getAllEntity();
+          getAllProperties();
         }else {
           ElMessage({
             message:res.result,
@@ -266,34 +296,131 @@ export default {
           })
         }
       })
+    };
 
+    const cancelEntity = (row) => {
+      ElMessageBox.confirm(
+          '是否删除该实体？',
+          {
+            confirmButtonText: '确认删除',
+            cancelButtonText: '取消',
+          }
+      ).then(() => {
+        let config={
+          params:{
+            id:row.id,
+          }
+        }
+        deleteEntity(config).then(res=>{
+          if (res.code==='00000'){
+            ElMessage({
+              type: 'success',
+              message: '实体已删除',
+            })
+            getAllEntity();
+            getAllProperties();
+          }
+        })
+      }).catch(() => {})
+    }
+
+    const selectedRow = ref(null); // 当前选中的行
+    // 点击行时更新选中的行
+    const handleRowClick = (row) => {
+      selectedRow.value = row; // 设置选中的行
+      selectEntity.value.name = row.type; // 更新选中的实体类型名称
+      selectEntity.value.id = row.id; // 更新选中的实体类型名称
+      selectProperty.value=propertyList.value[row.id]||'';
+      console.log("selectProperty",selectProperty.value);
+    };
+    const tableRowClassName = ({ row }) => {
+      return row === selectedRow.value ? "selected-row" : "";
+    };
+    /**** ***** ****/
+    /*** 属性部分 ***/
+    /**** ***** ****/
+
+    const typeMap = {
+      string: "字符串",
+      value: "数值",
+      time: "时间",
+    };
+
+    // 格式化函数
+    const formatType = (row, column, cellValue) => {
+      return typeMap[cellValue] || cellValue; // 如果找不到映射，则返回原始值
     };
 
     // 打开添加属性对话框
     const openAddAttributeDialog = () => {
       isEditAttribute.value = false; // 设置为添加模式
-      editAttributeForm.value = { name: '', dataclass: '', union: '' }; // 重置表单
+      propertyForm.value = { id: '', name: '', type: '', unit: '' }; // 重置表单
       attributeDialogVisible.value = true; // 显示对话框
     };
 
     // 编辑属性
     const editAttribute = (row) => {
       isEditAttribute.value = true; // 设置为编辑模式
-      editAttributeForm.value = { ...row }; // 将当前行的值复制到编辑表单
+      propertyForm.value = { ...row }; // 将当前行的值复制到编辑表单
       attributeDialogVisible.value = true; // 显示对话框
     };
 
+    //编辑提交
     const saveAttributeEdit = () => {
-      const index = tableData2.value.findIndex(item => item.name === editAttributeForm.value.name);
-      if (index !== -1) {
-        tableData2.value[index] = editAttributeForm.value; // 更新原数据
+      console.log("propertyForm",propertyForm.value);
+      let config={
+        params:{
+          id:propertyForm.value.id,
+          name:propertyForm.value.name,
+          type:propertyForm.value.type,
+          unit:propertyForm.value.unit,
+          entityId:selectEntity.value.id,
+        }
       }
-      attributeDialogVisible.value = false; // 关闭对话框
+      updateProperty(config).then(res=>{
+        if (res.code==='00000') {
+          ElMessage({
+            message: '修改成功',
+            type: 'success', // 可以是 'success', 'warning', 'info', 'error'
+          })
+          getAllProperties();
+          if (selectEntity.value.id!==''){
+            selectProperty.value=propertyList.value[selectEntity.value.id];
+          }
+          attributeDialogVisible.value = false; // 关闭对话框
+        }else
+          ElMessage({
+            message: res.result,
+            type: 'warning', // 可以是 'success', 'warning', 'info', 'error'
+          })
+      })
     };
 
+    //创建新属性
     const addAttribute = () => {
-      tableData2.value.push({ ...editAttributeForm.value }); // 添加新属性
-      attributeDialogVisible.value = false; // 关闭对话框
+      console.log("propertyForm",propertyForm.value);
+      let config={
+        params:{
+          name:propertyForm.value.name,
+          type:propertyForm.value.type,
+          unit:propertyForm.value.unit,
+          entityId:selectEntity.value.id,
+        }
+      }
+      createProperty(config).then(res=>{
+        if (res.code==='00000') {
+          ElMessage({
+            message: '创建成功',
+            type: 'success', // 可以是 'success', 'warning', 'info', 'error'
+          })
+          attributeDialogVisible.value = false; // 关闭对话框
+          getAllProperties();
+          if (selectEntity.value.id!==''){
+            selectProperty.value=propertyList.value[selectEntity.value.id];
+          }
+          console.log("selectProperty",selectProperty.value);
+        }
+      })
     };
 
     const currentPage1 = ref(1)
@@ -315,18 +442,28 @@ export default {
       graphId,
 
       entityList,
+      selectProperty,
+      selectEntity,
+      formatType,
+      typeMap,
+
+      selectedRow,
+      handleRowClick,
+      tableRowClassName,
 
       entityDialogVisible,
       attributeDialogVisible,
       isEditEntity,
       isEditAttribute,
       editEntityForm,
-      editAttributeForm,
-      tableData2,
+      propertyForm,
+      propertyList,
+
       openAddEntityDialog,
       editEntity,
       saveEntityEdit,
       addEntity,
+      cancelEntity,
       openAddAttributeDialog,
       editAttribute,
       saveAttributeEdit,
@@ -387,4 +524,13 @@ export default {
   overflow-x: auto;
   white-space: nowrap;
 }
+
+.operation {
+  margin-right: 10px;
+}
+
+::v-deep(.selected-row) {
+  background-color: rgb(220,220,220); /* 淡蓝色背景 */
+}
+
 </style>

@@ -7,9 +7,9 @@
       <el-row :gutter="20">
         <el-col :span="12" class="button-block">
           <el-button type="primary" class="button-box" @click="uploadDialogVisible = true">添加文件</el-button>
-<!--          <el-button type="primary" class="button-box">模块下载</el-button>-->
-          <el-button type="primary" class="button-box" @click="deleteMulti">批量删除</el-button>
-          <el-button type="primary" class="button-box" @click="downloadMulti">批量下载</el-button>
+          <el-button plain type="primary" class="button-box" @click="downloadTemplateFile">模块下载</el-button>
+          <el-button plain type="danger" class="button-box" @click="deleteMulti">批量删除</el-button>
+          <el-button plain type="success" class="button-box" @click="downloadMulti">批量下载</el-button>
         </el-col>
         <el-col :span="12">
           <el-input v-model="searchQuery" placeholder="按文件名称搜索" class="input-box" @input="handleSearch">
@@ -39,13 +39,14 @@
               :filters="[
                 { text: '实体与实例', value: 'entity' },
                 { text: '实体与关系', value: 'relation' },
+                { text: '实体与属性', value: 'property' },
               ]"
               :filter-method="filterTag"
               filter-placement="bottom-end"
           >
             <template #default="scope">
               <el-tag
-                  :type="scope.row.category === 'entity' ? 'warning' : 'success'"
+                  :type="scope.row.category === 'entity' ? 'warning' : scope.row.category === 'relation' ? 'success' : 'info'"
                   disable-transitions
               >{{ scope.row.category }}</el-tag
               >
@@ -126,6 +127,7 @@
       >
         <el-option label="实体类型与实体实例" value="entity" />
         <el-option label="实体类型关系" value="relation" />
+        <el-option label="实体类型属性" value="property" />
       </el-select>
       <template #footer>
         <div class="dialog-footer">
@@ -176,7 +178,7 @@
 <script >
 import Navbar from "@/components/Navbar.vue";
 import {computed, onMounted, ref} from 'vue';
-import {getAllFile, deleteFileById, downloadOne, downloadFiles, deleteTriple} from "@/api/index.js"
+import {getAllFile, deleteFileById, downloadOne, downloadFiles, deleteTriple, downloadTemplates} from "@/api/index.js"
 import axios from 'axios';
 import {ElMessage, ElMessageBox} from "element-plus";
 import VueOfficeExcel from '@vue-office/excel'
@@ -398,7 +400,6 @@ export default {
     const excelData = ref([]);
     // 操作处理函数
     const previewFile = (row) => {
-      //TODO:
       console.log('预览文件: ', row);
       axios.get(`http://localhost:9090/file/fetchFileContent`, {
         params: { id: row.id },
@@ -422,44 +423,6 @@ export default {
       .catch(error => {
         console.error('Error loading file:', error);
       });
-      // previewSrc.value = "http://localhost:9090/files/%E6%B5%8B%E8%AF%952.xlsx";
-      // window.open("https://view.officeapps.live.com/op/view.aspx?src="+encodeURIComponent(previewSrc))
-      // excelFormVisible.value=true;
-
-      // let config={
-      //   params:{
-      //     id:row.id,
-      //   }
-      // }
-      // fetchContent(config).then(res=>{
-      //   console.log(res);
-      //   if (res.code === "00000") {
-      //     console.log(res.result);
-          // 解码返回的base64字符串为ArrayBuffer
-          // excelFormVisible.value=true;
-          // const binaryString = atob(res.result);
-          // const len = binaryString.length;
-          // const bytes = new Uint8Array(len);
-          // for (let i = 0; i < len; i++) {
-          //   bytes[i] = binaryString.charCodeAt(i);
-          // }
-          // const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-          // 创建预览 URL
-          // previewSrc.value = URL.createObjectURL(blob);
-          // previewSrc.value = "http://localhost:9090/files/%E6%B5%8B%E8%AF%952.xlsx";
-          // const reader = new FileReader();
-          // reader.onload = (e) => {
-          //   console.log(e.target.result); // 查看读取的内容
-          // };
-          // reader.readAsText(blob);
-          // window.open("https://view.officeapps.live.com/op/view.aspx?src="+encodeURIComponent(previewSrc))
-          // console.log("previewSrc",previewSrc.value);
-      //   } else {
-      //     console.error(res.msg);
-      //   }
-      // })
-      // const blob = new Blob([file], { type: file.type });
-      // previewSrc.value = URL.createObjectURL(blob);
     };
 
     function download(result,name){
@@ -471,6 +434,15 @@ export default {
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
+    }
+
+    const downloadTemplateFile=async ()=>{
+      let config={
+        responseType: 'blob',
+      }
+      await downloadTemplates(config).then(res=>{
+        download(res,'结构化数据文件模版示例.zip');
+      })
     }
 
     const downloadFile = async (row) => {
@@ -577,6 +549,7 @@ export default {
       excelData,
       previewFile,
 
+      downloadTemplateFile,
       downloadFile,
       downloadMulti,
       deleteOne,

@@ -32,7 +32,7 @@
               <!-- 操作列 -->
               <el-table-column fixed="right" label="操作" align="center" show-overflow-tooltip>
                 <template #default="scope" >
-                  <el-link type="primary" class="operation" @click="previewFile(scope.row)">属性</el-link>
+                  <el-link type="primary" class="operation" @click="showProperty(scope.row)">属性</el-link>
                   <el-link type="danger" @click="deleteFile(scope.row)">删除</el-link>
                 </template>
               </el-table-column>
@@ -99,8 +99,24 @@
           </div>
         </el-col>
       </el-row>
-
     </el-card>
+
+    <el-dialog
+        title="属性列表"
+        v-model="propertyDialogVisible"
+        width="40%"
+    >
+      <el-table :data="currentProperties" stripe>
+        <el-table-column prop="name" label="属性名称" min-width="150" align="center"></el-table-column>
+        <el-table-column prop="value" label="属性值" min-width="150" align="center"></el-table-column>
+      </el-table>
+
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="propertyDialogVisible = false">关闭</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -108,7 +124,7 @@
 
 import Navbar from "@/components/Navbar.vue";
 import { onMounted, ref} from 'vue';
-import {allEntityItems, allItemRelation, generateGraph} from "@/api/index.js";
+import {allEntityItems, allItemProperty, allItemRelation, generateGraph} from "@/api/index.js";
 import {ElMessage} from "element-plus";
 
 export default {
@@ -124,6 +140,7 @@ export default {
 
     const entityTable=ref([]);
     const relationTable=ref([]);
+    const propertyMap=ref({});
     const input = ref('');
 
     const getAll=()=>{
@@ -135,18 +152,24 @@ export default {
       allEntityItems(config).then(res=>{
         if (res.code==='00000') {
           entityTable.value=res.result;
+          console.log("entityTable",entityTable.value);
         }
       })
       allItemRelation(config).then(res=>{
         if (res.code==='00000') {
           relationTable.value=res.result;
+          console.log("relationTable",relationTable.value);
         }
       })
-      console.log("entityTable",entityTable.value);
-      console.log("relationTable",relationTable.value);
+      allItemProperty(config).then(res=>{
+        if (res.code==='00000') {
+          propertyMap.value=res.result;
+          console.log("propertyMap",propertyMap.value);
+        }
+      })
     }
 
-    onMounted(()=>{
+    onMounted( ()=>{
       getAll();
     })
 
@@ -167,31 +190,32 @@ export default {
       })
     }
 
+    const currentProperties=ref([]);
+    const propertyDialogVisible=ref(false);
+    // 显示属性
+    const showProperty = (row) => {
+      console.log('row: ', row);
+      currentProperties.value = propertyMap.value[row.itemId] || []; // 根据 itemId 获取属性数据
+      console.log("currentProperties",currentProperties.value);
+      propertyDialogVisible.value = true; // 显示 Dialog
+    };
+
+    const deleteFile = (row) => {
+      console.log('删除文件: ', row.name);
+    };
+
+    //分页功能
     const currentPage1 = ref(1)
     const pageSize1 = ref(100)
     const currentPage2 = ref(1)
     const pageSize2 = ref(100)
     const size = ref('small')
-    // 处理分页
     const handleSizeChange = (size) => {
       console.log(`${size} items per page`)
     }
     const handleCurrentChange = (page) => {
       console.log(`current page: ${page}`)
     }
-
-    // 操作处理函数
-    const previewFile = (row) => {
-      console.log('预览文件: ', row.name);
-    };
-
-    const downloadFile = (row) => {
-      console.log('下载文件: ', row.name);
-    };
-
-    const deleteFile = (row) => {
-      console.log('删除文件: ', row.name);
-    };
 
     return{
       title,
@@ -200,11 +224,14 @@ export default {
 
       entityTable,
       relationTable,
+      propertyMap,
       getAll,
 
       input,
 
-      previewFile,
+      propertyDialogVisible,
+      currentProperties,
+      showProperty,
       deleteFile,
 
       generate,

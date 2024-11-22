@@ -181,14 +181,15 @@ export default {
     const entityRelationNumber= async () =>{
       return entityRelationCount().then(res => {
         entityRelationNumberList.value = res.result;
+        console.log("entityRelationNumberList",entityRelationNumberList.value);
         // console.log("entityRelationNumberList after fetch:", entityRelationNumberList.value); // 确认数据已赋值
       });
     }
 
     //获取数据库中所有图谱
-    const allGraph=()=>{
+    const allGraph=async ()=>{
       // console.log("Starting allGraph, entityRelationNumberList:", entityRelationNumberList.value); // 检查是否已加载
-      allGraphList().then(res=>{
+      return allGraphList().then(res=>{
         allGraphData.value=[];
         if (res.code==='00000'){
           res.result.forEach(item=>{
@@ -213,11 +214,15 @@ export default {
     }
 
     onMounted(async ()=>{
+      await refresh();
+    })
+
+    async function refresh(){
       // console.log("Start entityRelationNumber");
       await entityRelationNumber();
       // console.log("Finished entityRelationNumber, now start allGraph");
-      allGraph();
-    })
+      await allGraph();
+    }
 
     // const tooltipShow=ref(false);
 
@@ -238,9 +243,8 @@ export default {
 
     // const visible=ref(false);
 
-
     // 处理新建图谱
-    const createNewGraph = () => {
+    const createNewGraph = async () => {
       console.log('新建图谱');
       console.log('createForm',createForm);
       let config = {
@@ -254,7 +258,7 @@ export default {
             message: '创建成功',
             type: 'success', // 可以是 'success', 'warning', 'info', 'error'
           });
-          allGraph();
+          refresh();
         }else {
           ElMessage({
             message:'创建失败',

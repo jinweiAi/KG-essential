@@ -15,6 +15,7 @@ export const deleteFileById = config => request._get('/file/deleteFile',config);
 // export const fetchContent = config => request._get('/file/fetchFileContent',config);
 export const downloadOne = config => request._get('/file/downloadFile',config);
 export const downloadFiles = config => request._get('/file/downloadMultipleFiles',config);
+export const downloadTemplates = config => request._get('/file/downloadTemplateFiles',config);
 
 
 /* StructuredMapping.vue */
@@ -29,6 +30,10 @@ export const handleTask = config => request._get('/kg/task',config);
 export const allEntity = config => request._get('/kg/getAllEntity',config);
 export const createEntity = config => request._get('/kg/createEntity',config);
 export const updateEntity = config => request._get('/kg/updateEntityInfo',config);
+export const deleteEntity = config => request._get('/kg/deleteEntity',config);
+export const getProperty = config => request._get('/kg/getEntityPropertyByGraphId',config);
+export const createProperty = config => request._get('/kg/createProperty',config);
+export const updateProperty = config => request._get('/kg/updatePropertyInfo',config);
 
 /* RelationDesign.vue */
 export const allTriple = config => request._get('/kg/getAllTripleName',config);
@@ -40,3 +45,4 @@ export const deleteTriple = config => request._get('/kg/deleteTriple',config);
 export const allEntityItems = config => request._get('/kg/getAllEntityItem',config);
 export const allItemRelation = config => request._get('/kg/getAllItemRelation',config);
 export const generateGraph = config => request._get('/kg/generateGraph',config);
+export const allItemProperty = config => request._get('/kg/getAllItemProperty',config);

@@ -45,12 +45,10 @@
               <div><strong>实体类型：</strong>{{ showNodeInfo.category }}</div>
               <!-- 节点属性信息 -->
               <div v-if="showNodeInfo.property">
-                <p><strong>属性:</strong></p>
-                <ul>
-                  <li v-for="(value, key) in showNodeInfo.property" :key="key">
-                    <strong>{{ key }}：</strong>{{ value }}
-                  </li>
-                </ul>
+                <strong>属性:</strong>
+                <li v-for="(value, key) in showNodeInfo.property" :key="key">
+                  {{ key }}：{{ value }}
+                </li>
               </div>
             </div>
           </el-row>
@@ -120,6 +118,17 @@ export default {
     const relationType=ref([]);
     const itemType=ref([]);
 
+    function extractProperties(properties) {
+      let excludedKeys = ['name', 'node_name']; // 要排除的属性键
+      let filteredProperties = Object.keys(properties)
+          .filter(key => !excludedKeys.includes(key)) // 过滤掉 name 和 node_name
+          .reduce((obj, key) => {
+            obj[key] = properties[key]; // 保留其他属性
+            return obj;
+          }, {});
+      return filteredProperties; // 返回过滤后的对象
+    }
+
     const queryNeo4j = async()=> {
       const session = driver.session();
       try {
@@ -137,6 +146,7 @@ export default {
             name: source.properties.name,
             category: source.labels[0],
             itemStyle:{color:categoryColor.value[source.labels[0]]},
+            property:extractProperties(source.properties),
           };
           if (!nodes.value.some(node => JSON.stringify(node) === JSON.stringify(head_node))) {
             nodes.value.push(head_node);
@@ -147,6 +157,7 @@ export default {
               name: target.properties.name,
               category: target.labels[0],
               itemStyle:{color:categoryColor.value[target.labels[0]]},
+              property:extractProperties(target.properties),
             };
             if (!nodes.value.some(node => JSON.stringify(node) === JSON.stringify(tail_node))) {
               nodes.value.push(tail_node);
@@ -202,7 +213,7 @@ export default {
                 if (data.property) {
                   content += `属性：<br/>`; // 输出 "属性：" 作为分隔
                   for (const key in data.property) {
-                    content += `${key}: ${data.property[key]}<br/>`; // 输出每个属性和值
+                    content += `&ensp; ${key}: ${data.property[key]}<br/>`; // 输出每个属性和值
                   }
                 }
                 return content;
@@ -547,6 +558,8 @@ export default {
   background-color: rgba(169, 169, 169, 0.2);
   border-radius: 5px;
   padding: 10px;
+  overflow: auto;
+  white-space: nowrap;
 }
 
 .info-content{
