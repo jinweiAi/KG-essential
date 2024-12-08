@@ -27,6 +27,7 @@
           <el-icon><Suitcase /></el-icon>
           <span><pre>   本体设计</pre></span>
         </template>
+        <el-menu-item index="LLMDesign"><pre>  大语言模型设计</pre></el-menu-item>
         <el-menu-item index="EntityDesign"><pre>  实体设计</pre></el-menu-item>
         <el-menu-item index="RelationDesign"><pre>  关系设计</pre></el-menu-item>
       </el-sub-menu>
@@ -265,10 +266,10 @@ const out2GraphListPage=()=>{
 }
 
 .el-menu-vertical-demo {
- height: 100%;
- width: 20%;
- overflow: visible;
- position: fixed;
+  height: 100%;
+  width: 20%;
+  overflow: visible;
+  position: fixed;
 }
 
 .custom-menu-item el-menu-item, .custom-menu-item el-sub-menu__title {

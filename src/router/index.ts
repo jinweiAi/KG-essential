@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 // 导入你的组件
-import GraphList from "@/views/Building/GraphList.vue";
+import GraphList from "@/views/Building/GraphList.vue"
+import LLMDesign from '@/views/Building/Design/LLMDesign.vue'
 import EntityDesign from '@/views/Building/Design/EntityDesign.vue'
 import RelationDesign from '@/views/Building/Design/RelationDesign.vue'
 import StructuralData from '@/views/Building/Data/StructuralData.vue'
@@ -10,7 +11,9 @@ import StructuredMapping from '@/views/Building/GraphMapping/StructuredMapping.v
 import UnstructuredMapping from '@/views/Building/GraphMapping/UnstructuredMapping.vue'
 import GraphData from '@/views/Building/GraphData.vue'
 import GraphDetail  from "@/views/Building/GraphDetail.vue"
-import Temp from "@/views/Building/Temp.vue";
+import Temp from "@/views/Building/Temp.vue"
+import NewNavbar from "@/views/Building/NewNavbar.vue";
+
 
 
 const routes = [
@@ -18,6 +21,11 @@ const routes = [
         path: '/',
         name: 'GraphList',
         component: GraphList
+    },
+    {
+        path: '/LLMDesign',
+        name: 'LLMDesign',
+        component: LLMDesign
     },
     {
         path: '/EntityDesign',
@@ -63,6 +71,11 @@ const routes = [
         path: '/Temp',
         name: 'Temp',
         component:Temp
+    },
+    {
+        path: '/NewNavbar',
+        name: 'NewNavbar',
+        component:NewNavbar
     },
     // ...其他路由配置
     // {

@@ -159,7 +159,7 @@ import {
   createProperty,
   deleteEntity,
   getProperty,
-  updateEntity, updateProperty
+  updateEntity, updateProperty, useAPI
 } from "@/api/index.js";
 import {ElMessage, ElMessageBox} from "element-plus";
 

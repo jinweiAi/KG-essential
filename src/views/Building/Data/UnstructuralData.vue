@@ -2,65 +2,126 @@
   <Navbar :title="title"/>
   <div class="content-container">
     <div class="design"><strong>{{buildMethod}}</strong>/非结构化数据</div>
-<!--    <el-card style="background-color: rgba(169,169,169,0.1)">-->
-<!--      <el-row :gutter="20">-->
-<!--        <el-col :span="12" class="button-block">-->
-<!--          <el-button type="primary" class="button-box">添加文件</el-button>-->
-<!--          <el-button type="primary" class="button-box">模块下载</el-button>-->
-<!--          <el-button type="primary" class="button-box">批量删除</el-button>-->
-<!--          <el-button type="primary" class="button-box">批量下载</el-button>-->
-<!--        </el-col>-->
-<!--        <el-col :span="12">-->
-<!--          <el-input v-model="searchQuery" placeholder="请输入图谱名称" class="input-box">-->
-<!--            <template #append>-->
-<!--              <el-button @click="handleSearch" icon="Search"></el-button>-->
-<!--            </template>-->
-<!--          </el-input>-->
-<!--        </el-col>-->
-<!--      </el-row>-->
+    <el-card style="background-color: rgba(169,169,169,0.1)">
+      <el-row :gutter="20">
+        <el-col :span="12" class="button-block">
+          <el-button type="primary" class="button-box" @click="uploadDialogVisible = true">添加文件</el-button>
+          <el-button plain type="danger" class="button-box" @click="deleteMulti">批量删除</el-button>
+          <el-button plain type="success" class="button-box" @click="downloadMulti">批量下载</el-button>
+        </el-col>
+        <el-col :span="12">
+          <el-input v-model="searchQuery" placeholder="按文件名称搜索" class="input-box" @input="handleSearch">
+            <template #prepend>
+              <el-icon><Search /></el-icon>
+            </template>
+          </el-input>
+        </el-col>
+      </el-row>
 
-<!--      &lt;!&ndash; 表格 &ndash;&gt;-->
-<!--      <el-table-->
-<!--          v-model:selection="multipleSelection"-->
-<!--          :data="tableData"-->
-<!--          @selection-change="handleSelectionChange"-->
-<!--          stripe-->
-<!--          class="table-box"-->
-<!--      >-->
-<!--        <el-table-column type="selection" width="40"></el-table-column>-->
-<!--        <el-table-column prop="id" label="序号" width="60"></el-table-column>-->
-<!--        <el-table-column prop="name" label="文件名称" min-width="200"></el-table-column>-->
-<!--        <el-table-column prop="type" label="文件类型" width="120"></el-table-column>-->
-<!--        <el-table-column prop="size" label="文件大小" width="80"></el-table-column>-->
-<!--        <el-table-column prop="uploader" label="更新人" width="150"></el-table-column>-->
-<!--        <el-table-column prop="uploadTime" label="更新时间" width="220"></el-table-column>-->
+      <!-- 表格 -->
+      <el-col class="noWrapOverflowX">
+        <el-table
+            v-model:selection="multipleSelection"
+            :data="searchedList"
+            @selection-change="handleSelectionChange"
+            stripe
+            class="table-box"
+        >
+          <el-table-column type="selection" width="40"></el-table-column>
+          <el-table-column prop="id" label="序号" width="70"></el-table-column>
+          <el-table-column prop="name" label="文件名称" min-width="150"></el-table-column>
+          <el-table-column prop="category" label="文件分类" min-width="120">
+            <template #default="scope">
+              <el-tag type="danger" disable-transitions>{{ scope.row.category }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="type" label="文件类型" min-width="100"></el-table-column>
+          <el-table-column prop="size" label="文件大小" min-width="100"></el-table-column>
+          <el-table-column prop="uploadTime" label="更新时间" min-width="180"></el-table-column>
 
-<!--        &lt;!&ndash; 操作列 &ndash;&gt;-->
-<!--        <el-table-column fixed="right" label="操作" width="150">-->
-<!--          <template #default="scope" >-->
-<!--            <el-link type="primary" class="operation" @click="previewFile(scope.row)">预览</el-link>-->
-<!--            <el-link type="success" class="operation" @click="downloadFile(scope.row)">下载</el-link>-->
-<!--            <el-link type="danger" class="operation" @click="deleteFile(scope.row)">删除</el-link>-->
-<!--          </template>-->
-<!--        </el-table-column>-->
-<!--      </el-table>-->
+          <!-- 操作列 -->
+          <el-table-column fixed="right" label="操作" width="150">
+            <template #default="scope" >
+              <el-link type="primary" class="operation" @click="previewFile(scope.row)">预览</el-link>
+              <el-link type="success" class="operation" @click="downloadFile(scope.row)">下载</el-link>
+              <el-link type="danger" class="operation" @click="deleteOne(scope.row)">删除</el-link>
+            </template>
+          </el-table-column>
+        </el-table>
 
-<!--      <div class="demo-pagination-block">-->
-<!--        <el-pagination-->
-<!--            v-model:current-page="currentPage"-->
-<!--            v-model:page-size="pageSize"-->
-<!--            :page-sizes="[10, 20, 50, 100]"-->
-<!--            :size="size"-->
-<!--            layout="total, sizes, prev, pager, next, jumper"-->
-<!--            :total=tableData.length-->
-<!--            @size-change="handleSizeChange"-->
-<!--            @current-change="handleCurrentChange"-->
-<!--        />-->
-<!--      </div>-->
+        <div class="demo-pagination-block">
+          <el-pagination
+              v-model:current-page="currentPage"
+              v-model:page-size="pageSize"
+              :page-sizes="[10, 20, 50, 100]"
+              :size="size"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total=searchedList.length
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+          />
+        </div>
+      </el-col>
+    </el-card>
 
-<!--    </el-card>-->
+    <el-dialog  v-model="uploadDialogVisible" width="40%" draggable>
+      <template #header>
+        <span style="font-size: 24px;font-weight: bold;">上传文件</span>
+      </template>
+      <el-upload
+          :file-list="fileList"
+          :on-change="changeFile"
+          class="upload-demo"
+          action="http://localhost:9090/file/uploadFile"
+          :auto-upload="false"
+          accept=".zip"
+          drag
+          name="file"
+          :on-remove="removeFile"
+      >选择文件或拖拽
+        <template #tip>
+          <div class="el-upload__tip">
+            支持xml/pdf/doc/docx/txt的压缩文件
+          </div>
+        </template>
+      </el-upload>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button :disabled="ableToUpload" type="primary" @click="submitUpload">上传文件</el-button>
+        </div>
+      </template>
+    </el-dialog>
 
+    <el-dialog v-model="formVisible" max-width="70%" draggable style="max-height: 650px">
+      <template #header>
+        <span style="font-size: 24px;font-weight: bold;">文件预览</span>
+      </template>
+      <el-table
+          :data="contentMap"
+          style="overflow-y: auto"
+          :max-height="550"
+          @row-click="showFileContent"
+          :row-class-name="tableRowClassName"
+      >
+        <el-table-column prop="fileName" label="文件列表" align="left" show-overflow-tooltip></el-table-column>
+      </el-table>
+    </el-dialog>
+
+    <el-dialog
+        v-model="fileContentVisible"
+        max-width="50%"
+        draggable
+        style="margin-right: 20px;max-height: 500px;"
+    >
+      <template #header>
+        <span style="font-size: 16px;">{{ clickedFile.fileName }}</span>
+      </template>
+      <div class="content-box">
+        <div>{{clickedFile.content}}</div>
+      </div>
+    </el-dialog>
   </div>
+
 
 </template>
 
@@ -68,6 +129,19 @@
 <script lang="js">
 
   import Navbar from "@/components/Navbar.vue";
+  import {computed, onMounted, ref} from "vue";
+  import {
+    deleteFileById,
+    downloadFiles,
+    downloadOne,
+    downloadTemplates,
+    getAllFile,
+    getZipContent
+  } from "@/api/index.js";
+  import {ElMessage, ElMessageBox} from "element-plus";
+  import qs from "qs";
+  import axios from "axios";
+  import * as XLSX from "xlsx";
 
   export default {
     name:"UnstructuralData",
@@ -75,16 +149,367 @@
     setup(){
       const title = sessionStorage.getItem('ProjectName');
       const buildMethod = (sessionStorage.getItem('ProjectBuild')==="custom")?"自定义构建":"模版构建";
+      const graphId = sessionStorage.getItem('ProjectId');
+
+      console.log(title);
+
+      const originList=ref([]);
+      const searchedList=ref([]);
+      // 搜索框的数据
+      const searchQuery = ref('');
+      // 处理搜索事件
+      const handleSearch = () => {
+        console.log('搜索:', searchQuery.value);
+        if (searchQuery.value) {
+          searchedList.value=[];
+          for (let i=0;i<originList.value.length;i++) {
+            if (originList.value[i].name.toLowerCase().includes(searchQuery.value.toLowerCase())) {
+              searchedList.value.push(originList.value[i]);
+            }
+          }
+        }else {
+          searchedList.value = originList.value;
+        }
+        console.log("searchedList",searchedList.value);
+      };
+
+      function getFileList(){
+        let config={
+          params:{
+            graphID:graphId
+          }
+        }
+        getAllFile(config).then(res=>{
+          originList.value=[];
+          if (res.code==='00000') {
+            console.log(res.result);
+            res.result.forEach(item => {
+              let list = {
+                id: item.id,
+                name: item.name,
+                category: item.category,
+                type: item.type,
+                size: item.size,
+                uploadTime: item.updateTime,
+              }
+              originList.value.push(list);
+            })
+            console.log("originList", originList.value);
+            searchedList.value=originList.value;
+          }
+        })
+      }
+
+      onMounted(()=>{
+        getFileList();
+      })
+
+      const multipleSelection = ref([]);
+
+      // 处理表格选择
+      const handleSelectionChange = (val) => {
+        multipleSelection.value = val;
+      };
+
+      const deleteMulti=()=>{
+        console.log("multipleSelection",multipleSelection.value);
+        ElMessageBox.confirm(
+            '是否批量删除文件？',
+            {
+              confirmButtonText: '确认删除',
+              cancelButtonText: '取消',
+            }
+        ).then(() => {
+          let idArray=[];
+          for(let i=0;i<multipleSelection.value.length;i++){
+            idArray.push(multipleSelection.value[i].id);
+          }
+          console.log("idArray",idArray);
+          let config={
+            params:{
+              idList:idArray,
+            },
+            paramsSerializer: {
+              serialize: params => {
+                return qs.stringify(params, {indices:false})
+              }
+            }
+          }
+          deleteFileById(config).then(res=>{
+            console.log(res);
+            if (res.code === '00000') {
+              ElMessage({
+                message: '删除成功',
+                type: 'success', // 可以是 'success', 'warning', 'info', 'error'
+              })
+              getFileList();
+            }else{
+              ElMessage({
+                message: "id为"+res.data.result+"的文件删除失败！",
+                type: 'error', // 可以是 'success', 'warning', 'info', 'error'
+              });
+            }
+          })
+        }).catch(() => {})
+      }
+
+      //文件上传处理
+      const uploadDialogVisible = ref(false);
+
+      const fileList = ref([]);
+
+      const changeFile = (file) =>{
+        fileList.value=[file];
+        console.log(fileList.value);
+      }
+
+      const uploadSuccess = (response,file)=>{
+        fileList.value.push(file);
+        console.log(fileList.value);
+      }
+
+      const removeFile = (response,file)=>{
+        fileList.value.splice(fileList.value.indexOf(file),1);
+        console.log(fileList.value);
+      }
+
+      const ableToUpload = computed(()=>{
+        return fileList.value.length===0;
+      })
+
+      const fileCategory=ref('');
+
+      const submitUpload=()=>{
+        console.log("fileList",fileList.value)
+        if (fileList.value.length>0){
+          const formData = new FormData(); // 创建一个 FormData 对象
+          formData.append("file", fileList.value[0].raw); // 将文件添加到 FormData
+          formData.append("graphID", graphId); // 添加其他参数
+          formData.append("category", "unstructured");
+
+          axios.post("http://localhost:9090/file/uploadFile", formData,
+              {
+                headers: {
+                  'Content-Type': 'multipart/form-data'
+                },
+                withCredentials: true // 如果后端需要凭证
+              })
+              .then(res => {
+                console.log(res);
+                if (res.data.code === '00000') {
+                  console.log("上传成功");
+                  uploadDialogVisible.value=false;
+                  ElMessage({
+                    message: '上传成功',
+                    type: 'success', // 可以是 'success', 'warning', 'info', 'error'
+                  });
+                  getFileList();
+                } else {
+                  ElMessage({
+                    message: res.data.result,
+                    type: 'error', // 可以是 'success', 'warning', 'info', 'error'
+                  });
+                }
+                fileList.value=[];
+              })
+              .catch(err => {
+                console.error("上传出现错误", err);
+              });
+        }
+      }
+
+      const formVisible=ref(false);
+      const contentMap=ref([]);
+
+      const previewFile = (row) => {
+        console.log('预览文件: ', row);
+        let config={
+          params: {
+            id: row.id
+          }
+        }
+        getZipContent(config).then(res=>{
+          if (res.code==='00000') {
+            contentMap.value=res.result;
+            //TODO：未处理pdf和doc形式
+            // res.result.forEach(item=>{
+            //   let map={
+            //     fileType:'',
+            //     fileName:'',
+            //     content:'',
+            //   }
+            //   let type = item.fileName.split('/')[0];
+            //   map.fileType=type;
+            //   map.fileName=item.fileName.split('/')[1];
+            //   if (type==='xml'||type==='txt'){
+            //     // map.content=atob(item.content);
+            //     map.content=item.content;
+            //   }else if (type==='pdf'){
+            //   }else if (type==='docx' || type==='doc'){
+            //   }
+            //   contentMap.value.push(map);
+            // })
+            console.log("contentMap",contentMap.value);
+            formVisible.value=true;
+          }
+        })
+      };
+
+      const fileContentVisible=ref(false);
+      const clickedFile=ref(null);
+      const showFileContent=(row)=>{
+        fileContentVisible.value=true;
+        clickedFile.value=row;
+        console.log("clickedFile",clickedFile.value);
+      }
+
+      const tableRowClassName = ({ row }) => {
+        if (!fileContentVisible.value){
+          return "";
+        }else{
+          return row === clickedFile.value ? "selected-row" : "";
+        }
+      };
+
+      const currentPage = ref(1)
+      const pageSize = ref(100)
+
+      const size = ref('small')
+
+      function download(result,name){
+        const url = window.URL.createObjectURL(new Blob([result], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
+        const link = document.createElement('a')
+        link.style.display = 'none'
+        link.href = url
+        link.setAttribute('download', name)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      }
+
+      const downloadFile = async (row) => {
+        console.log('下载文件: ', row.name);
+        let config = {
+          params: {
+            id: row.id,
+          },
+          responseType: 'blob'
+        }
+        await downloadOne(config).then((res => {
+          let name = row.name;
+          download(res,name);
+        }))
+      };
+
+      const downloadMulti = async () => {
+        console.log("multipleSelection",multipleSelection.value);
+        let idArray=[];
+        for(let i=0;i<multipleSelection.value.length;i++){
+          idArray.push(multipleSelection.value[i].id);
+        }
+        let config={
+          params:{
+            fileIds:idArray,
+          },
+          paramsSerializer: {
+            serialize: params => {
+              return qs.stringify(params, {indices:false})
+            }
+          },
+          responseType: 'blob',
+        }
+        await downloadFiles(config).then(res=>{
+          download(res,'结构化数据文件.zip');
+        })
+      }
+
+      const deleteOne = (row) => {
+        console.log('删除文件: ', row.name);
+        ElMessageBox.confirm(
+            '是否删除该文件？',
+            {
+              confirmButtonText: '确认删除',
+              cancelButtonText: '取消',
+            }
+        ).then(() => {
+          let config={
+            params:{
+              idList:row.id,
+            }
+          }
+          deleteFileById(config).then(res=>{
+            console.log(res);
+            if (res.code === '00000') {
+              ElMessage({
+                message: '删除成功',
+                type: 'success', // 可以是 'success', 'warning', 'info', 'error'
+              })
+              getFileList();
+            }else{
+              ElMessage({
+                message: "id为"+res.data.result+"的文件删除失败！",
+                type: 'error', // 可以是 'success', 'warning', 'info', 'error'
+              });
+            }
+          })
+        }).catch(() => {})
+      };
+
+      // 处理分页
+      const handleSizeChange = (size) => {
+        console.log(`${size} items per page`)
+      }
+      const handleCurrentChange = (page) => {
+        console.log(`current page: ${page}`)
+      }
+
+      const filterTag = (value, row) => {
+        return row.category === value;
+      }
 
       return {
         title,
         buildMethod,
+        graphId,
+        originList,
+        searchedList,
+        searchQuery,
+        handleSearch,
+        uploadDialogVisible,
+        fileList,
+        changeFile,
+        uploadSuccess,
+        removeFile,
+        ableToUpload,
+        fileCategory,
+        submitUpload,
+
+        formVisible,
+        contentMap,
+        previewFile,
+        showFileContent,
+        fileContentVisible,
+        clickedFile,
+        tableRowClassName,
+
+        downloadFile,
+        downloadMulti,
+        deleteOne,
+        multipleSelection,
+        deleteMulti,
+        handleSelectionChange,
+        handleSizeChange,
+        handleCurrentChange,
+        pageSize,
+        currentPage,
+        size,
+        filterTag,
       }
     }
   };
 </script>
 
-<style>
+<style scoped>
 .content-container {
   margin-left: 20%; /* 给内容部分留出导航栏的宽度 */
   padding: 20px;
@@ -101,4 +526,56 @@
   margin-bottom: 15px;
 }
 
+.button-block {
+  display: flex;
+  gap: 20px; /* 设置元素之间的间距 */
+  align-items: center; /* 垂直居中 */
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.button-box {
+  flex: 1; /* 每个按钮等分宽度 */
+  min-width: 50px;
+}
+
+.input-box {
+  float: right;
+  display: flex;
+  width: 50%;
+  min-width: 200px;
+}
+
+.table-box {
+  margin-top: 30px;
+  max-height: 600px;
+}
+
+.operation {
+  margin-right: 10px;
+}
+
+.demo-pagination-block {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  float: right;
+  display: flex;
+}
+
+.noWrapOverflowX{
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+::v-deep(.selected-row) {
+  background-color: rgb(220,220,220);
+}
+
+.content-box {
+  white-space: pre-wrap; /* 保留空格和换行 */
+  word-wrap: break-word; /* 长单词换行 */
+  font-family: monospace; /* 使用等宽字体，增强显示效果 */
+  overflow-y: auto;
+  max-height: 400px;
+}
 </style>

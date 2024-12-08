@@ -17,6 +17,9 @@ export const downloadOne = config => request._get('/file/downloadFile',config);
 export const downloadFiles = config => request._get('/file/downloadMultipleFiles',config);
 export const downloadTemplates = config => request._get('/file/downloadTemplateFiles',config);
 
+/* UnstructuralData.vue */
+export const getZipContent = config => request._get('/file/fetchZipContent',config);
+
 
 /* StructuredMapping.vue */
 export const createNewTask = config => request._get('/task/createTask',config);
@@ -26,6 +29,12 @@ export const updateTask = config => request._get('/task/updateTask',config);
 export const deleteTaskById = config => request._get('/task/deleteTask',config);
 export const handleTask = config => request._get('/kg/task',config);
 
+/* LLMDesign */
+export const useAPI = config => request._get('/kg/useAPI',config);
+export const createEntitiesAndProperties = config => request._post('/kg/createMultiEntitiesAndProperties',config);
+export const createRelations = config => request._post('/kg/createMultiRelations',config);
+
+
 /* EntityDesign.vue */
 export const allEntity = config => request._get('/kg/getAllEntity',config);
 export const createEntity = config => request._get('/kg/createEntity',config);
@@ -34,6 +43,7 @@ export const deleteEntity = config => request._get('/kg/deleteEntity',config);
 export const getProperty = config => request._get('/kg/getEntityPropertyByGraphId',config);
 export const createProperty = config => request._get('/kg/createProperty',config);
 export const updateProperty = config => request._get('/kg/updatePropertyInfo',config);
+
 
 /* RelationDesign.vue */
 export const allTriple = config => request._get('/kg/getAllTripleName',config);

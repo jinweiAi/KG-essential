@@ -168,8 +168,6 @@
         </el-table-column>
       </el-table>
     </el-dialog>
-
-
   </div>
 
 </template>
@@ -620,11 +618,6 @@ export default {
   margin-bottom: 10px;
   float: right;
   display: flex;
-}
-
-.preview_dialog{
-  max-height: 300px;
-  overflow-y: auto;
 }
 
 .noWrapOverflowX{

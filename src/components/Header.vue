@@ -62,7 +62,7 @@
 
 <script>
 import { ref } from 'vue';
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter, } from 'vue-router'
 import { ChatRound,Operation,User,Document } from '@element-plus/icons-vue';
 
 export default {
@@ -75,43 +75,48 @@ export default {
   },
   setup(){
     const router = useRouter()
-    const route = useRoute()
     const activeButton= ref('tools')
 
-    function goToRoute(route) {
-      // 根据点击的按钮设置当前活动按钮
-      activeButton.value = route;
+    // 路由跳转方法
+    const goToRoute = (routeName) => {
+      activeButton.value = routeName;  // 更新 activeButton 的值
+      router.push({ name: routeName });  // 使用 router 跳转
+    };
 
-      // 路由跳转，根据 route 参数设置不同的路由
-      switch (route) {
-        case 'explore':
-          console.log('to explore page')
-          // router.push({
-          //   path: '/',
-          // }); // 跳转到“图谱探索”页面
-          break;
-        case 'tools':
-          console.log('to tools page')
-          router.push({
-            path: '/',
-          }); // 跳转到“构建工具”页面
-          break;
-        case 'user':
-          console.log('to user page')
-          // router.push({
-          //   path: '/',
-          // }); // 跳转到“用户中心”页面
-          break;
-        case 'help':
-          console.log('to help page')
-          // router.push({
-          //   path: '/',
-          // }); // 跳转到“帮助文档”页面
-          break;
-        default:
-          break;
-      }
-    }
+    // function goToRoute(route) {
+    //   // 根据点击的按钮设置当前活动按钮
+    //   activeButton.value = route;
+    //
+    //   // 路由跳转，根据 route 参数设置不同的路由
+    //   switch (route) {
+    //     case 'explore':
+    //       console.log('to explore page')
+    //       // router.push({
+    //       //   path: '/',
+    //       // }); // 跳转到“图谱探索”页面
+    //       break;
+    //     case 'tools':
+    //       console.log('to tools page')
+    //       router.push({
+    //         path: '/',
+    //       }); // 跳转到“构建工具”页面
+    //       break;
+    //     case 'user':
+    //       console.log('to user page')
+    //       // router.push({
+    //       //   path: '/',
+    //       // }); // 跳转到“用户中心”页面
+    //       break;
+    //     case 'help':
+    //       console.log('to help page')
+    //       // router.push({
+    //       //   path: '/',
+    //       // }); // 跳转到“帮助文档”页面
+    //       break;
+    //     default:
+    //       break;
+    //   }
+    // }
 
     return{
       activeButton,
@@ -163,15 +168,14 @@ export default {
   font-size: 18px;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
 }
+/* 你也可以添加 hover 效果 */
+.a:hover {
+  color: white; /* 鼠标悬停时变为灰色 */
+}
 
 /* 选中状态的按钮样式 */
 .active {
   color: white; /* 点击后文字变为蓝色 */
-}
-
-/* 你也可以添加 hover 效果 */
-.a:hover {
-  color: white; /* 鼠标悬停时变为灰色 */
 }
 
 .menu {

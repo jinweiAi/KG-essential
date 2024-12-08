@@ -116,7 +116,7 @@
     <!--编辑任务对话框-->
     <el-dialog v-model="editDialogVisible" width="40%" draggable>
       <template #header>
-        <span style="font-size: 24px;font-weight: bold;">修改图谱</span>
+        <span style="font-size: 24px;font-weight: bold;">修改任务</span>
       </template>
       <el-form :model="editedTask" :rules="rules" style="padding: 20px">
         <el-form-item label="任务名称" prop="name">
