@@ -86,7 +86,7 @@
         <span style="font-size: 24px;font-weight: bold;">上传文件</span>
       </template>
 <!--      <el-upload :file-list="fileList" :on-change="changeFile" drag :limit="1" accept=".xlsx"-->
-<!--                 action="http://localhost:9090/task/uploadFile" name="file" :on-success="uploadSuccess" :on-remove="removeFile"-->
+<!--                 action="http://172.29.7.246:9090/task/uploadFile" name="file" :on-success="uploadSuccess" :on-remove="removeFile"-->
 <!--                 :data="{ graphID: graphId }">-->
 <!--        选择文件或拖拽-->
 <!--      </el-upload>-->
@@ -98,7 +98,7 @@
           :file-list="fileList"
           :on-change="changeFile"
           class="upload-demo"
-          action="http://localhost:9090/file/uploadFile"
+          action="http://172.29.7.246:9090/file/uploadFile"
           :auto-upload="false"
           accept=".xlsx"
           drag
@@ -347,7 +347,7 @@ export default {
         formData.append("graphID", graphId); // 添加其他参数
         formData.append("category", fileCategory.value);
 
-        axios.post("http://localhost:9090/file/uploadFile", formData,
+        axios.post("http://172.29.7.246:9090/file/uploadFile", formData,
             {
               headers: {
                 'Content-Type': 'multipart/form-data'
@@ -399,7 +399,7 @@ export default {
     // 操作处理函数
     const previewFile = (row) => {
       console.log('预览文件: ', row);
-      axios.get(`http://localhost:9090/file/fetchFileContent`, {
+      axios.get(`http://172.29.7.246:9090/file/fetchFileContent`, {
         params: { id: row.id },
         responseType: 'arraybuffer', // 确保返回的是二进制数据
       }).then(response => {

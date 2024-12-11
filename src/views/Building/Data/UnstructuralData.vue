@@ -72,7 +72,7 @@
           :file-list="fileList"
           :on-change="changeFile"
           class="upload-demo"
-          action="http://localhost:9090/file/uploadFile"
+          action="http://172.29.7.246:9090/file/uploadFile"
           :auto-upload="false"
           accept=".zip"
           drag
@@ -287,7 +287,7 @@
           formData.append("graphID", graphId); // 添加其他参数
           formData.append("category", "unstructured");
 
-          axios.post("http://localhost:9090/file/uploadFile", formData,
+          axios.post("http://172.29.7.246:9090/file/uploadFile", formData,
               {
                 headers: {
                   'Content-Type': 'multipart/form-data'

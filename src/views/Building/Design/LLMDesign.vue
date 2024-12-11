@@ -154,8 +154,8 @@ export default {
 
     const originEntityList=ref([]);
     const originRelationList=ref([]);
-    const entityForm=reactive([]);
-    const relationForm=reactive([]);
+    const entityForm=ref([]);
+    const relationForm=ref([]);
     const collapsedList=ref([]);
     const submitEntityTask=ref(false);
 
@@ -176,35 +176,29 @@ export default {
           })
           console.log(res.result);
           originEntityList.value=res.result['entity'];
-          originEntityList.value.forEach((item)=>{
-            let each={
-              entity:item.entity,
-              property:item.property,
-              entityCheck:false,
-              propertyCheck:new Array(item.property.length).fill(false),
-            }
-            entityForm.push(each);
-          })
+          entityForm.value = originEntityList.value.map(item => ({
+            entity: item.entity,
+            property: item.property,
+            entityCheck: false,
+            propertyCheck: new Array(item.property.length).fill(false),
+          }));
           // entityForm.value=originEntityList.value;
           console.log("originEntityList",originEntityList.value);
-          console.log("entityForm",entityForm);
+          console.log("entityForm",entityForm.value);
           originRelationList.value=res.result['relation'];
-          originRelationList.value.forEach((item)=>{
-            let each={
-              headEntity:item.headEntity,
-              relation:item.relation,
-              tailEntity:item.tailEntity,
-              check:false,
-            }
-            relationForm.push(each);
-          })
+          relationForm.value = originRelationList.value.map(item => ({
+            headEntity: item.headEntity,
+            relation: item.relation,
+            tailEntity: item.tailEntity,
+            check: false,
+          }));
           // relationForm.value=originRelationList.value;
           console.log("originRelationList",originRelationList.value);
-          console.log("relationForm",relationForm);
+          console.log("relationForm",relationForm.value);
           showForm.value=true;
           submitEntityTask.value=false;
           console.log("submitEntityTask",submitEntityTask.value);
-          collapsedList.value=new Array(entityForm.length).fill(false);
+          collapsedList.value=new Array(entityForm.value.length).fill(false);
         }
       })
     }
@@ -216,48 +210,47 @@ export default {
     }
 
     const choseEntity= computed(() => {
-      return entityForm.some(item => item.entityCheck);
+      return entityForm.value.some(item => item.entityCheck);
     });
 
     const entityCheck=(index)=>{
-      entityForm[index].entityCheck=!entityForm[index].entityCheck;
-      entityForm[index].propertyCheck=new Array(entityForm[index].property.length).fill(entityForm[index].entityCheck);
+      entityForm.value[index].entityCheck=!entityForm.value[index].entityCheck;
+      entityForm.value[index].propertyCheck=new Array(entityForm.value[index].property.length).fill(entityForm.value[index].entityCheck);
       // console.log('entityCheck',entityForm[index].entityCheck);
       // console.log('propertyCheck',entityForm[index].propertyCheck);
     }
 
     const propertyCheck=(index,propertyIndex)=>{
-      entityForm[index].propertyCheck[propertyIndex]=!entityForm[index].propertyCheck[propertyIndex];
-      if(entityForm[index].propertyCheck[propertyIndex]){
-        entityForm[index].entityCheck=true;
+      entityForm.value[index].propertyCheck[propertyIndex]=!entityForm.value[index].propertyCheck[propertyIndex];
+      if(entityForm.value[index].propertyCheck[propertyIndex]){
+        entityForm.value[index].entityCheck=true;
       }
     }
 
     const allRelation=ref(false);
     const choseRelation= computed(() => {
-      return relationForm.some(item => item.check);
+      return relationForm.value.some(item => item.check);
     });
     const relationCheckAll=()=>{
       allRelation.value=!allRelation.value;
-      relationForm.forEach((item)=>{
+      relationForm.value.forEach((item)=>{
         item.check=allRelation.value;
       })
     }
 
     const relationCheck=(index)=>{
-      relationForm[index].check=!relationForm[index].check;
-      if (relationForm[index].check){
+      relationForm.value[index].check=!relationForm.value[index].check;
+      if (relationForm.value[index].check){
         allRelation.value=true;
-      }else if (relationForm.every(item => !item.check)) {
+      }else if (relationForm.value.every(item => !item.check)) {
         allRelation.value=false;
       }
     }
 
-
     const submitEntity=()=>{
-      console.log('entityForm',entityForm);
+      console.log('entityForm',entityForm.value);
       let submitEntityList=[];
-      entityForm.forEach((item)=>{
+      entityForm.value.forEach((item)=>{
         if (item.entityCheck) {
           let propertyList=[];
           for(let i=0;i<item.property.length;i++){
@@ -289,9 +282,9 @@ export default {
     }
 
     const submitRelation=()=>{
-      console.log('relationForm',relationForm);
+      console.log('relationForm',relationForm.value);
       let submitRelationList=[];
-      relationForm.forEach((item)=>{
+      relationForm.value.forEach((item)=>{
         if(item.check){
           let each={
             headEntity:item.headEntity,
